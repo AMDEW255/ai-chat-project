@@ -81,15 +81,29 @@ function sendMessage() {
     .then(data => {
         const reply = data.choices[0].message.content;
         const aiMessage = createMessage(reply, 'ИИ:');
- 
+
+        // ✅ Добавляем сообщение ИИ в массив
+        messagesArray.push(aiMessage);
+
+        // ✅ Обновляем localStorage с учётом ответа ИИ
+        try {
+            localStorage.setItem('messages', JSON.stringify(messagesArray));
+        } catch (e) {
+            if (e.name === 'QuotaExceededError') {
+                messagesArray = messagesArray.slice(-50);
+                localStorage.setItem('messages', JSON.stringify(messagesArray));
+            }
+        }
+
+        // Отображаем ответ ИИ на странице
         messagesBox.innerHTML += `
             <p class="msg msg-ai">
-                        <span class="time">${aiMessage.time}</span>
-                        <span class="text">
-                            <b>${aiMessage.sender}</b>
-                            ${aiMessage.text}
-                        </span>
-                    </p>
+                <span class="time">${aiMessage.time}</span>
+                <span class="text">
+                    <b>${aiMessage.sender}</b>
+                    ${aiMessage.text}
+                </span>
+            </p>
         `;
     });
 }
