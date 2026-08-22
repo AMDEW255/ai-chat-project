@@ -1,5 +1,6 @@
 // Сохранять сообщения в localStorage
- 
+const API_KEY = 'sk-bc2278f344264c40a4e709b4e085db32';
+
 function createMessage(text, sender) {
     return {
         text,
