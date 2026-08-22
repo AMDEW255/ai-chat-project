@@ -1,0 +1,766 @@
+<title>Шпаргалка по Git</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#eef0f4;
+    --paper-raise:#ffffff;
+    --ink:#1c212b;
+    --ink-soft:#5a6272;
+    --line:#d7dbe3;
+    --accent:#2f7a56;
+    --accent-soft:#e4f1e9;
+    --accent-ink:#1f5c40;
+    --warn:#b8712a;
+    --warn-soft:#fbeddc;
+    --warn-ink:#8a561f;
+    --code-bg:#1c212b;
+    --code-ink:#eef0f4;
+    --code-accent:#7fd8a8;
+    --shadow: 0 1px 2px rgba(28,33,43,0.04), 0 8px 24px rgba(28,33,43,0.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14171e;
+      --paper-raise:#1b1f28;
+      --ink:#e9ebf0;
+      --ink-soft:#a2a9b8;
+      --line:#2c313d;
+      --accent:#5fbe8b;
+      --accent-soft:#1c2b23;
+      --accent-ink:#8fdcb2;
+      --warn:#e3a85c;
+      --warn-soft:#332918;
+      --warn-ink:#f0c085;
+      --code-bg:#0e1116;
+      --code-ink:#e9ebf0;
+      --code-accent:#7fd8a8;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14171e;
+    --paper-raise:#1b1f28;
+    --ink:#e9ebf0;
+    --ink-soft:#a2a9b8;
+    --line:#2c313d;
+    --accent:#5fbe8b;
+    --accent-soft:#1c2b23;
+    --accent-ink:#8fdcb2;
+    --warn:#e3a85c;
+    --warn-soft:#332918;
+    --warn-ink:#f0c085;
+    --code-bg:#0e1116;
+    --code-ink:#e9ebf0;
+    --code-accent:#7fd8a8;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Manrope', system-ui, sans-serif;
+    line-height:1.55;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:56px 24px 96px;
+  }
+  h1,h2,h3{
+    font-family:'PT Serif', Georgia, serif;
+    text-wrap:balance;
+    margin:0;
+  }
+  header.hero{
+    margin-bottom:48px;
+  }
+  .eyebrow{
+    display:inline-block;
+    font-size:0.78rem;
+    letter-spacing:0.11em;
+    text-transform:uppercase;
+    color:var(--accent-ink);
+    background:var(--accent-soft);
+    padding:5px 12px;
+    border-radius:999px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  h1{
+    font-size:clamp(2rem, 4.5vw, 2.7rem);
+    font-weight:700;
+    margin-bottom:14px;
+  }
+  .lede{
+    font-size:1.05rem;
+    color:var(--ink-soft);
+    max-width:62ch;
+  }
+
+  code, .cmd{
+    font-family:'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  /* workflow strip */
+  .flow{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:12px;
+    margin:40px 0 12px;
+  }
+  .flow-note{
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    margin:0 0 56px;
+  }
+  .flow-step{
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:18px 16px;
+    box-shadow:var(--shadow);
+    position:relative;
+  }
+  .flow-step .num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem;
+    color:var(--accent-ink);
+    background:var(--accent-soft);
+    width:22px;height:22px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .flow-step code{
+    display:block;
+    font-size:0.88rem;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:6px;
+    word-break:break-word;
+  }
+  .flow-step p{
+    margin:0;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+  }
+  .flow-arrow{
+    display:none;
+  }
+  @media (min-width: 720px){
+    .flow{ grid-template-columns:repeat(5, 1fr); align-items:stretch; }
+  }
+  @media (max-width: 719px){
+    .flow{ grid-template-columns:1fr; }
+  }
+
+  nav.toc{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:48px;
+  }
+  nav.toc a{
+    font-size:0.85rem;
+    color:var(--ink-soft);
+    text-decoration:none;
+    border:1px solid var(--line);
+    padding:6px 12px;
+    border-radius:999px;
+    background:var(--paper-raise);
+    transition:color .15s, border-color .15s;
+  }
+  nav.toc a:hover, nav.toc a:focus-visible{
+    color:var(--accent-ink);
+    border-color:var(--accent);
+    outline:none;
+  }
+
+  section.group{
+    margin-bottom:52px;
+    scroll-margin-top:20px;
+  }
+  section.group h2{
+    font-size:1.5rem;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  section.group .group-desc{
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    margin-bottom:22px;
+    max-width:60ch;
+  }
+
+  .card{
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .card-head{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .card-head code.cmd{
+    font-size:1rem;
+    font-weight:600;
+    color:var(--ink);
+    background:var(--accent-soft);
+    padding:3px 10px;
+    border-radius:6px;
+  }
+  .card.warn .card-head code.cmd{
+    background:var(--warn-soft);
+    color:var(--warn-ink);
+  }
+  .card p{
+    margin:0 0 10px;
+    color:var(--ink-soft);
+    font-size:0.96rem;
+  }
+  .card p:last-child{ margin-bottom:0; }
+  .card .example{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem;
+    padding:12px 14px;
+    border-radius:8px;
+    overflow-x:auto;
+  }
+  .card .example .g{ color:var(--code-accent); }
+  .card .caution{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.78rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--warn-ink);
+    margin-bottom:8px;
+  }
+
+  .glossary{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:14px;
+  }
+  .glossary .term{
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 18px;
+  }
+  .glossary dt{
+    font-family:'PT Serif', serif;
+    font-weight:700;
+    margin-bottom:4px;
+  }
+  .glossary dd{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:0.92rem;
+  }
+
+  .practice-card{
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:20px 22px;
+    margin-bottom:14px;
+    display:flex;
+    gap:16px;
+  }
+  .practice-card .num{
+    flex:none;
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent-ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem;
+    font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .practice-card .body{ flex:1; min-width:0; }
+  .practice-card h3{
+    font-family:'Manrope', sans-serif;
+    font-size:1.02rem;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+  .practice-card p{
+    margin:0 0 10px;
+    color:var(--ink-soft);
+    font-size:0.94rem;
+  }
+  .practice-card p:last-child{ margin-bottom:0; }
+  .practice-card .example{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem;
+    padding:12px 14px;
+    border-radius:8px;
+    overflow-x:auto;
+    margin-bottom:10px;
+  }
+  .practice-card .example .g{ color:var(--code-accent); }
+  .practice-card .example:last-child{ margin-bottom:0; }
+
+  footer{
+    margin-top:60px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    color:var(--ink-soft);
+    font-size:0.85rem;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+
+  figure.diagram{
+    margin:0 0 36px;
+    background:var(--paper-raise);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 20px 16px;
+    box-shadow:var(--shadow);
+  }
+  figure.diagram svg{
+    display:block;
+    width:100%;
+    height:auto;
+    color:var(--ink);
+  }
+  figure.diagram figcaption{
+    margin-top:10px;
+    font-size:0.85rem;
+    color:var(--ink-soft);
+  }
+  .svg-accent{ color:var(--accent); }
+  .svg-soft{ color:var(--ink-soft); }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Шпаргалка · Git</span>
+    <h1>Основные команды Git — просто и по делу</h1>
+    <p class="lede">Короткий справочник по командам, которые нужны в начале пути: сохранить изменения, посмотреть историю, поработать с ветками и загрузить проект на GitHub. Под каждой командой — что она делает и живой пример.</p>
+  </header>
+
+  <div class="flow" aria-label="Типичный порядок действий при первой заливке проекта">
+    <div class="flow-step">
+      <span class="num">1</span>
+      <code>git init</code>
+      <p>Превращаем папку в репозиторий — Git начинает следить за изменениями.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">2</span>
+      <code>git add .</code>
+      <p>Отмечаем файлы, которые хотим сохранить в следующем снимке.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">3</span>
+      <code>git commit -m "..."</code>
+      <p>Делаем снимок отмеченных файлов с описанием, что изменилось.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">4</span>
+      <code>git remote add origin &lt;ссылка&gt;</code>
+      <p>Один раз связываем папку с репозиторием на GitHub, куда будем всё отправлять.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">5</span>
+      <code>git push -u origin main</code>
+      <p>Отправляем снимки на GitHub, чтобы их видели остальные.</p>
+    </div>
+  </div>
+  <p class="flow-note">Шаг 4 нужен только один раз для проекта — если репозиторий уже подключён, сразу переходите к <code>git push</code>. Без него <code>git push</code> выдаст ошибку «no configured push destination».</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 980 240" role="img" aria-label="Путь файла от рабочей папки через индекс и локальный репозиторий до GitHub, и команды, которые двигают его в обе стороны">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <rect x="20" y="70" width="180" height="100" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="110" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Рабочая папка</text>
+      <text x="110" y="130" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">файлы, которые</text>
+      <text x="110" y="144" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">вы редактируете</text>
+
+      <rect x="280" y="70" width="180" height="100" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="370" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Индекс (staging)</text>
+      <text x="370" y="130" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">что попадёт</text>
+      <text x="370" y="144" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">в следующий коммит</text>
+
+      <rect x="540" y="70" width="180" height="100" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <text x="630" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">Локальный репозиторий</text>
+      <text x="630" y="130" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">папка .git —</text>
+      <text x="630" y="144" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">история коммитов</text>
+
+      <rect x="800" y="70" width="160" height="100" rx="10" fill="none" stroke="currentColor" stroke-width="1.5" class="svg-accent"/>
+      <text x="880" y="110" text-anchor="middle" font-size="13" font-weight="600" fill="currentColor">GitHub</text>
+      <text x="880" y="130" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">(origin)</text>
+      <text x="880" y="144" text-anchor="middle" font-size="11" class="svg-soft" fill="currentColor">удалённая копия</text>
+
+      <line x1="202" y1="55" x2="278" y2="55" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="240" y="42" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" fill="currentColor">git add</text>
+
+      <line x1="462" y1="55" x2="538" y2="55" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="500" y="42" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" fill="currentColor">git commit</text>
+
+      <line x1="722" y1="55" x2="798" y2="55" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" class="svg-accent"/>
+      <text x="760" y="42" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" class="svg-accent" fill="currentColor">git push</text>
+
+      <line x1="278" y1="185" x2="202" y2="185" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="240" y="205" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" fill="currentColor">git restore</text>
+
+      <line x1="798" y1="185" x2="722" y2="185" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)" class="svg-accent"/>
+      <text x="760" y="205" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" class="svg-accent" fill="currentColor">git pull</text>
+    </svg>
+    <figcaption>Файл проходит четыре зоны слева направо: правите его в рабочей папке → <code>git add</code> кладёт в индекс → <code>git commit</code> сохраняет снимок в локальный <code>.git</code> → <code>git push</code> отправляет коммиты на GitHub. Нижние стрелки — обратный путь: <code>git restore</code> отменяет правки, <code>git pull</code> забирает чужие коммиты с GitHub.</figcaption>
+  </figure>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 760 220" role="img" aria-label="Ветка new-feature отходит от main, получает свои коммиты и сливается обратно через git merge">
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <line x1="40" y1="170" x2="720" y2="170" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow2)"/>
+      <text x="40" y="196" font-size="12" font-family="'JetBrains Mono', monospace" fill="currentColor">main</text>
+
+      <circle cx="100" cy="170" r="4" fill="currentColor"/>
+      <circle cx="190" cy="170" r="4" fill="currentColor"/>
+      <circle cx="640" cy="170" r="4" fill="currentColor"/>
+
+      <polyline points="260,170 300,80 480,80 560,170" fill="none" stroke="currentColor" class="svg-accent" stroke-width="1.5"/>
+      <circle cx="260" cy="170" r="4" fill="currentColor"/>
+      <circle cx="340" cy="80" r="4" class="svg-accent" fill="currentColor"/>
+      <circle cx="420" cy="80" r="4" class="svg-accent" fill="currentColor"/>
+      <circle cx="560" cy="170" r="4" fill="currentColor"/>
+
+      <text x="390" y="62" text-anchor="middle" font-size="12" font-family="'JetBrains Mono', monospace" class="svg-accent" fill="currentColor">new-feature</text>
+      <text x="262" y="132" font-size="11" class="svg-soft" fill="currentColor">git switch -c</text>
+      <text x="262" y="145" font-size="11" class="svg-soft" fill="currentColor">new-feature</text>
+      <text x="470" y="132" text-anchor="end" font-size="11" class="svg-soft" fill="currentColor">git merge</text>
+      <text x="470" y="145" text-anchor="end" font-size="11" class="svg-soft" fill="currentColor">new-feature</text>
+    </svg>
+    <figcaption>От ветки <code>main</code> ответвляется <code>new-feature</code> (<code>git switch -c new-feature</code>), получает свои коммиты отдельно от основной линии, а затем сливается обратно через <code>git merge new-feature</code> — main получает все изменения feature-ветки одним слиянием.</figcaption>
+  </figure>
+
+  <nav class="toc" aria-label="Разделы">
+    <a href="#setup">Настройка</a>
+    <a href="#daily">Ежедневный цикл</a>
+    <a href="#history">История</a>
+    <a href="#branches">Ветки</a>
+    <a href="#remote">GitHub</a>
+    <a href="#undo">Отмена изменений</a>
+    <a href="#glossary">Словарик</a>
+    <a href="#practice">Практика</a>
+  </nav>
+
+  <section class="group" id="setup">
+    <h2>Настройка</h2>
+    <p class="group-desc">Выполняется один раз на компьютере или один раз в новом проекте.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git init</code></div>
+      <p>Создаёт в текущей папке скрытую папку <code>.git</code> — с этого момента Git запоминает историю изменений этой папки.</p>
+      <div class="example">$ <span class="g">git init</span>
+Initialized empty Git repository in ./ai-chat-project/.git/</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git config</code></div>
+      <p>Говорит Git, как подписывать снимки — от чьего имени они сделаны. Настраивается один раз на весь компьютер.</p>
+      <div class="example">$ <span class="g">git config --global user.name</span> "Маша"
+$ <span class="g">git config --global user.email</span> "masha@example.com"</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git clone &lt;ссылка&gt;</code></div>
+      <p>Скачивает существующий репозиторий с GitHub к себе на компьютер вместе со всей историей.</p>
+      <div class="example">$ <span class="g">git clone</span> https://github.com/имя/проект.git</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">.gitignore</code></div>
+      <p>Не команда, а обычный текстовый файл в корне проекта. В нём построчно перечисляют файлы и папки, которые Git должен <strong>игнорировать</strong> — не показывать в <code>git status</code> и не предлагать в <code>git add</code>. Обычно туда попадают файлы, которые не нужны в истории: пароли и ключи (<code>.env</code>), папка с установленными пакетами (<code>node_modules</code>), временные и системные файлы.</p>
+      <div class="example">.gitignore
+────────────
+node_modules/
+.env
+*.log</div>
+      <p><strong>Важно:</strong> правило работает только для файлов, которые Git ещё не отслеживает. Если файл уже был закоммичен раньше, добавление его в <code>.gitignore</code> не остановит слежку — сначала нужно снять его с учёта командой <code>git rm --cached &lt;файл&gt;</code>.</p>
+    </div>
+  </section>
+
+  <section class="group" id="daily">
+    <h2>Ежедневный цикл</h2>
+    <p class="group-desc">Эти три команды используются каждый раз, когда нужно сохранить прогресс.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git status</code></div>
+      <p>Показывает, какие файлы изменились и что из них уже готово к сохранению. Самая безопасная команда — ничего не меняет, только показывает.</p>
+      <div class="example">$ <span class="g">git status</span>
+modified: chat.js
+untracked: notes.md</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git add &lt;файл&gt;</code></div>
+      <p>Отмечает файл как готовый к сохранению. <code>git add .</code> отмечает сразу все изменённые файлы в папке.</p>
+      <div class="example">$ <span class="g">git add</span> chat.js
+$ <span class="g">git add</span> .</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git commit -m "сообщение"</code></div>
+      <p>Сохраняет снимок отмеченных файлов навсегда в историю. Сообщение в кавычках коротко объясняет, что изменилось — это как подпись под фотографией.</p>
+      <div class="example">$ <span class="g">git commit -m</span> "добавила время к сообщениям"</div>
+    </div>
+  </section>
+
+  <section class="group" id="history">
+    <h2>История</h2>
+    <p class="group-desc">Смотрим, что уже было сохранено, и что именно изменилось.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git log</code></div>
+      <p>Показывает список всех сохранённых снимков (коммитов) — кто, когда и с каким сообщением их сделал. Полезно добавить <code>--oneline</code>, чтобы список был короче.</p>
+      <div class="example">$ <span class="g">git log --oneline</span>
+1f8bedb docs: add lesson 11
+d899d2a docs: add lesson 10
+22d5445 feat: store chat messages</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git diff</code></div>
+      <p>Показывает построчно, что именно изменилось в файлах с прошлого сохранения — какие строки удалили, а какие добавили.</p>
+      <div class="example">$ <span class="g">git diff</span> chat.js
+- console.log("старое")
++ console.log("новое")</div>
+    </div>
+  </section>
+
+  <section class="group" id="branches">
+    <h2>Ветки</h2>
+    <p class="group-desc">Ветка — это отдельная линия работы, чтобы пробовать новое, не трогая основной код.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git branch</code></div>
+      <p>Без аргументов — показывает список веток и отмечает, в какой из них вы сейчас находитесь. С именем — создаёт новую ветку.</p>
+      <div class="example">$ <span class="g">git branch</span>
+* main
+  new-feature</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git switch &lt;ветка&gt;</code></div>
+      <p>Переключает на другую ветку. Чтобы сразу создать ветку и перейти в неё — <code>git switch -c &lt;имя&gt;</code>.</p>
+      <div class="example">$ <span class="g">git switch -c</span> new-feature</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git merge &lt;ветка&gt;</code></div>
+      <p>Забирает изменения из указанной ветки в ту, где вы сейчас находитесь. Обычно так соединяют готовую фичу с основной веткой <code>main</code>.</p>
+      <div class="example">$ <span class="g">git switch</span> main
+$ <span class="g">git merge</span> new-feature</div>
+    </div>
+  </section>
+
+  <section class="group" id="remote">
+    <h2>Работа с GitHub</h2>
+    <p class="group-desc">Синхронизация локального репозитория с копией на GitHub.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git remote add origin &lt;ссылка&gt;</code></div>
+      <p>Связывает локальный репозиторий с адресом на GitHub — под коротким именем <code>origin</code>. Делается один раз для проекта.</p>
+      <div class="example">$ <span class="g">git remote add origin</span> https://github.com/имя/проект.git</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git push</code></div>
+      <p>Отправляет сохранённые коммиты из компьютера на GitHub. Первый раз обычно пишут <code>git push -u origin main</code>, дальше достаточно просто <code>git push</code>.</p>
+      <div class="example">$ <span class="g">git push -u origin</span> main</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git pull</code></div>
+      <p>Забирает свежие изменения с GitHub на компьютер — например, если проект менялся с другого устройства.</p>
+      <div class="example">$ <span class="g">git pull</span> origin main</div>
+    </div>
+  </section>
+
+  <section class="group" id="undo">
+    <h2>Отмена изменений</h2>
+    <p class="group-desc">Команды на случай ошибок. Часть из них меняет историю — используйте аккуратно и по очереди, не все сразу.</p>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git restore &lt;файл&gt;</code></div>
+      <p>Отменяет несохранённые изменения в файле, возвращая его к последнему коммиту. Полезно, если что-то сломали и хотите начать заново.</p>
+      <div class="example">$ <span class="g">git restore</span> chat.js</div>
+    </div>
+
+    <div class="card warn">
+      <span class="caution">⚠ осторожно</span>
+      <div class="card-head"><code class="cmd">git reset</code></div>
+      <p>Отменяет последние коммиты, как будто их не было. Хорошо подходит для своих ещё не отправленных на GitHub изменений — но не после <code>git push</code>, если кто-то ещё пользуется репозиторием.</p>
+      <div class="example">$ <span class="g">git reset --soft</span> HEAD~1</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><code class="cmd">git revert &lt;коммит&gt;</code></div>
+      <p>Безопасный способ отменить старый коммит: создаёт новый коммит, который откатывает изменения, а историю не переписывает. Годится даже после <code>git push</code>.</p>
+      <div class="example">$ <span class="g">git revert</span> 22d5445</div>
+    </div>
+  </section>
+
+  <section class="group" id="glossary">
+    <h2>Словарик на всякий случай</h2>
+    <dl class="glossary">
+      <div class="term">
+        <dt>Репозиторий</dt>
+        <dd>Папка проекта, за которой следит Git — со всей сохранённой историей изменений.</dd>
+      </div>
+      <div class="term">
+        <dt>Коммит</dt>
+        <dd>Один сохранённый снимок файлов с подписью, что в нём изменилось.</dd>
+      </div>
+      <div class="term">
+        <dt>Ветка (branch)</dt>
+        <dd>Отдельная линия разработки — можно пробовать идеи, не трогая основной код.</dd>
+      </div>
+      <div class="term">
+        <dt>origin</dt>
+        <dd>Короткое имя для адреса репозитория на GitHub, с которым синхронизируется компьютер.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="group" id="practice">
+    <h2>Практика: соберите репозиторий с нуля</h2>
+    <p class="group-desc">Пройдите шаги по порядку в терминале — это тот же путь, что и на схемах выше, только руками. Понадобится папка на компьютере и аккаунт на GitHub.</p>
+
+    <div class="practice-card">
+      <span class="num">1</span>
+      <div class="body">
+        <h3>Создайте папку проекта</h3>
+        <p>Создайте где угодно на компьютере новую папку <code>practice-git</code> — обычным способом, через проводник или VS Code — и откройте её в терминале VS Code (меню <strong>Terminal → New Terminal</strong>). Какой именно это терминал — не важно: команды <code>git</code> работают одинаково и в PowerShell (он открывается по умолчанию), и в Git Bash, и в обычном cmd.</p>
+        <div class="example">$ <span class="g">cd</span> practice-git</div>
+        <p><code>cd</code> — команда терминала (не Git), она переводит вас в указанную папку, чтобы дальше все команды выполнялись именно в ней.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">2</span>
+      <div class="body">
+        <h3>Инициализируйте репозиторий</h3>
+        <div class="example">$ <span class="g">git init</span></div>
+        <p>Теперь в папке появилась скрытая <code>.git</code> — Git начал следить за изменениями.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">3</span>
+      <div class="body">
+        <h3>Создайте файл и посмотрите на него глазами Git</h3>
+        <p>Создайте в этой папке файл <code>about.txt</code> любым удобным способом — например, через VS Code (правой кнопкой → New File) или проводник — и напишите в нём любую строку текста. Это обычное действие с файлом, Git тут ни при чём.</p>
+        <div class="example">$ <span class="g">git status</span>
+Untracked files: about.txt</div>
+        <p>Файл появился на диске, но Git пока его не отслеживает — отсюда и <code>untracked</code> («неотслеживаемый»).</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">4</span>
+      <div class="body">
+        <h3>Сделайте первый коммит</h3>
+        <div class="example">$ <span class="g">git add</span> about.txt
+$ <span class="g">git commit -m</span> "первый коммит"</div>
+        <p>Файл попал в индекс, а потом — снимком в историю локального репозитория.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">5</span>
+      <div class="body">
+        <h3>Создайте пустой репозиторий на GitHub и подключите его</h3>
+        <p>На github.com нажмите <strong>New repository</strong>, назовите его <code>practice-git</code>, не добавляйте README — иначе истории на GitHub и локально разойдутся.</p>
+        <div class="example">$ <span class="g">git remote add origin</span> https://github.com/ваш-логин/practice-git.git
+$ <span class="g">git push -u origin</span> main</div>
+        <p>Первый <code>push</code> с флагом <code>-u</code> запоминает связку — дальше достаточно просто <code>git push</code>.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">6</span>
+      <div class="body">
+        <h3>Измените файл и отправьте новую версию</h3>
+        <p>Допишите в <code>about.txt</code> ещё одну строку и сохраните файл.</p>
+        <div class="example">$ <span class="g">git diff</span>
+$ <span class="g">git add</span> about.txt
+$ <span class="g">git commit -m</span> "добавила вторую строку"
+$ <span class="g">git push</span></div>
+        <p><code>git diff</code> перед добавлением — привычка, которая показывает, что именно вы сохраняете.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">7</span>
+      <div class="body">
+        <h3>Попробуйте ветку</h3>
+        <div class="example">$ <span class="g">git switch -c</span> experiment</div>
+        <p>Допишите в <code>about.txt</code> ещё одну строку и сохраните.</p>
+        <div class="example">$ <span class="g">git add</span> about.txt
+$ <span class="g">git commit -m</span> "пробное изменение"</div>
+        <p>Коммит попал только в ветку <code>experiment</code> — в <code>main</code> его пока нет.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">8</span>
+      <div class="body">
+        <h3>Слейте ветку обратно и отправьте на GitHub</h3>
+        <div class="example">$ <span class="g">git switch</span> main
+$ <span class="g">git merge</span> experiment
+$ <span class="g">git push</span></div>
+        <p>Теперь изменения из <code>experiment</code> — часть <code>main</code>, и они отправлены в GitHub.</p>
+      </div>
+    </div>
+
+    <div class="practice-card">
+      <span class="num">9</span>
+      <div class="body">
+        <h3>Посмотрите на всю историю</h3>
+        <div class="example">$ <span class="g">git log --oneline</span></div>
+        <p>Список коммитов, которые вы только что сделали руками — от первого до слияния ветки.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Шпаргалка для урока по Git — держите её под рукой во время практики.
+  </footer>
+
+</div>
