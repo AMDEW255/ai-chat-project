@@ -9,6 +9,7 @@ function createMessage(text, sender) {
 }
  
 function sendMessage() {
+    const loaderIndicator = document.querySelector('.loader');
     const input = document.querySelector('.user-input');
     const messagesBox = document.querySelector('.messages');
     const noMessagesBox = document.querySelector('.no-messages');
@@ -63,7 +64,8 @@ function sendMessage() {
         noMessagesBox.textContent = '';
         clearBtn.classList.remove('hidden');
     }
- 
+
+    loaderIndicator.classList.remove('hidden')
     fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
@@ -79,6 +81,7 @@ function sendMessage() {
     })
     .then(response => response.json())
     .then(data => {
+        loaderIndicator.classList.add('hidden')
         const reply = data.choices[0].message.content;
         const aiMessage = createMessage(reply, 'ИИ:');
 
