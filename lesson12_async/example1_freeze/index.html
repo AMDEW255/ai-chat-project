@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пример 1 — зависание вкладки</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; line-height: 1.6; }
+        .clock { font-size: 32px; font-variant-numeric: tabular-nums; margin: 10px 0; }
+        button { padding: 10px 16px; font-size: 15px; border: none; border-radius: 8px; color: #fff; cursor: pointer; margin-right: 8px; }
+        .freeze-btn { background: #e24a4a; }
+        .wait-btn { background: #4a90e2; }
+        input { padding: 8px; font-size: 15px; width: 260px; }
+        .result { margin-top: 12px; color: #555; }
+        code { background: #eee; padding: 2px 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Пример 1 — почему нужен асинхронный код</h1>
+
+    <p>Часы тикают каждые 0.1 секунды. Пока страница «жива» — они идут.</p>
+    <div class="clock">--:--:--</div>
+
+    <p>Попробуй печатать в этом поле, пока идёт задержка:</p>
+    <input type="text" placeholder="печатай сюда">
+
+    <p>
+        <button class="freeze-btn">Заморозить на 3 сек (синхронно)</button>
+        <button class="wait-btn">Подождать 3 сек (setTimeout)</button>
+    </p>
+
+    <div class="result"></div>
+
+    <hr>
+    <p><b>Что заметить:</b></p>
+    <ul>
+        <li>Красная кнопка — часы <b>останавливаются</b> на 3 секунды, в поле <b>не напечатать</b>, страница мертва. Текст ниже тоже не меняется, пока не «отвиснет» — браузер не успевает перерисовать.</li>
+        <li>Синяя кнопка — часы <b>идут</b>, печатать <b>можно</b>. Браузер свободен, просто ответ придёт позже.</li>
+    </ul>
+
+    <script src="script.js"></script>
+</body>
+</html>

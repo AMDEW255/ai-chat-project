@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Пример 4 — .then и .catch</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; line-height: 1.6; }
+        button { padding: 10px 16px; font-size: 15px; border: none; border-radius: 8px; background: #4a90e2; color: #fff; cursor: pointer; }
+        .status { color: gray; font-size: 13px; min-height: 18px; }
+        .answer { font-size: 18px; margin-top: 8px; }
+        label { display: block; margin: 10px 0; }
+        code { background: #eee; padding: 2px 5px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Пример 4 — <code>.then</code> и <code>.catch</code></h1>
+
+    <p>Здесь <b>нет</b> настоящего интернета. Внизу в <code>script.js</code> есть функция
+    <code>fakeRequest()</code> — она ведёт себя как <code>fetch</code> (возвращает промис,
+    у ответа есть <code>.json()</code>), но всё происходит на твоём компьютере, без сети.</p>
+
+    <label>
+        <input type="checkbox" class="break"> сломать ответ (промис уйдёт в rejected)
+    </label>
+
+    <button class="load-btn">Запросить</button>
+    <p class="status"></p>
+    <p class="answer"></p>
+
+    <hr>
+    <p>Задание: в <code>script.js</code> заполни тело <code>.catch</code> (место отмечено).
+    Потом поставь галочку «сломать ответ» и нажми кнопку — увидишь, как срабатывает <code>.catch</code>.</p>
+
+    <script src="script.js"></script>
+</body>
+</html>

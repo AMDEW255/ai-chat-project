@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Урок 12 — Асинхронный код: промисы, таймеры и fetch</title>
+<style>
+  :root {
+    --bg: #fbf9f5;
+    --card: #ffffff;
+    --text: #24211d;
+    --muted: #6b6459;
+    --accent: #c2410c;
+    --accent-soft: #fff1e7;
+    --line: #e7e1d6;
+    --code-bg: #2d2a26;
+    --code-text: #f4efe7;
+    --ok: #15803d;
+    --ok-soft: #eafaf0;
+    --warn: #b45309;
+    --warn-soft: #fdf4e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+    font-size: 17px;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.lesson {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+  }
+  header.lesson .tag {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  h1 {
+    font-size: 30px;
+    line-height: 1.25;
+    margin: 14px 0 6px;
+  }
+  h2 {
+    font-size: 22px;
+    margin: 44px 0 12px;
+    padding-top: 8px;
+  }
+  h3 {
+    font-size: 18px;
+    margin: 28px 0 8px;
+    color: var(--accent);
+  }
+  p { margin: 12px 0; }
+  .lead { color: var(--muted); font-size: 18px; }
+  hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 40px 0;
+  }
+  code {
+    background: #f0ece2;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
+    font-size: 15px;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 18px 20px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+  .box {
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border: 1px solid var(--line);
+  }
+  .box.analogy { background: var(--accent-soft); border-color: #f3d9c6; }
+  .box.note { background: var(--ok-soft); border-color: #c7ebd4; }
+  .box.warn { background: var(--warn-soft); border-color: #f0dcb4; }
+  .box .box-title {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+  }
+  .box.analogy .box-title { color: var(--accent); }
+  .box.note .box-title { color: var(--ok); }
+  .box.warn .box-title { color: var(--warn); }
+  ol, ul { padding-left: 24px; }
+  li { margin: 8px 0; }
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+  }
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 44px;
+    margin: 16px 0;
+  }
+  .steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .timeline {
+    border-left: 3px solid var(--line);
+    padding-left: 20px;
+    margin: 20px 0;
+  }
+  .timeline .t {
+    position: relative;
+    margin: 14px 0;
+  }
+  .timeline .t::before {
+    content: "";
+    position: absolute;
+    left: -27px;
+    top: 8px;
+    width: 11px;
+    height: 11px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .q { font-weight: 700; }
+  a { color: var(--accent); }
+  .hw {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 8px 24px 20px;
+    margin-top: 24px;
+  }
+  .practice {
+    background: var(--accent-soft);
+    border: 1px solid #f3d9c6;
+    border-left: 5px solid var(--accent);
+    border-radius: 10px;
+    padding: 6px 22px 18px;
+    margin: 24px 0;
+  }
+  .practice .box-title {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--accent);
+    margin: 14px 0 4px;
+  }
+  .practice .path {
+    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #f0dcc7;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 18px 0;
+    font-size: 15.5px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #f0ece2; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="lesson">
+  <span class="tag">Урок 12</span>
+  <h1>Асинхронный код: промисы, таймеры и что на самом деле делает <code>fetch</code></h1>
+  <p class="lead">Ты уже сделала чат с нейросетью (уроки 9–11). Там есть строчка <code>fetch(...)</code> и после неё непонятные <code>.then(...)</code>. Сегодня разберёмся, что это такое и почему так написано.</p>
+</header>
+
+<hr>
+
+<div class="box note">
+  <div class="box-title">Как устроен урок</div>
+  <p style="margin:6px 0 0;">Урок идёт кусочками теории, и после каждого — оранжевая плашка <b>🔧 Практика</b> с маленьким примером. Лучше всего разбирать пример сразу, пока теория перед глазами, — но если увлеклась чтением, ничего страшного: вернёшься к примерам потом.</p>
+  <p style="margin:6px 0 0;">Все примеры лежат в папках рядом с этим файлом: <code>example1_freeze</code>, <code>example2_timer</code>, <code>example3_promise</code>, <code>example4_fetch</code>, <code>example5_async_await</code>. Это обычные <code>index.html</code> + <code>script.js</code> — никакого интернета, всё работает у тебя на компьютере. Как открывать — по шагам в первой плашке «Практика».</p>
+</div>
+
+<hr>
+
+<h2>1. JavaScript делает одно дело за раз</h2>
+
+<p>Код выполняется сверху вниз, строчка за строчкой. Пока не закончилась одна строка — следующая не начнётся. Это называется <b>синхронный</b> код.</p>
+
+<pre><code>console.log('раз');
+console.log('два');
+console.log('три');
+// в консоли: раз, два, три — всегда в этом порядке</code></pre>
+
+<p>Проблема: некоторые вещи <b>занимают время</b>. Например, запрос к нейросети идёт через интернет и может думать 2–5 секунд. Если бы JavaScript просто «стоял и ждал» ответа — на это время зависла бы вся страница: кнопки не нажимаются, текст не печатается, ничего.</p>
+
+<div class="box analogy">
+  <div class="box-title">Аналогия</div>
+  Ты заказала пиццу по телефону. Ты же не стоишь у двери 40 минут, не двигаясь, пока её везут. Ты вешаешь трубку и занимаешься своими делами, а когда пицца приедет — курьер позвонит в дверь. Вот это и есть <b>асинхронность</b>: «начни долгое дело, а меня позови, когда будет готово».
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 1: что значит «страница зависла»</div>
+  <span class="path">lesson12_async/example1_freeze/</span>
+  <p>Первый раз — подробно, дальше плашки будут короче.</p>
+  <ol>
+    <li><b>Открой папку</b> <code>lesson12_async/example1_freeze/</code> в редакторе (VS Code). Внутри два файла: <code>index.html</code> и <code>script.js</code>.</li>
+    <li><b>Открой <code>index.html</code> в браузере</b> — двойной клик по файлу в проводнике, или правый клик → «Открыть с помощью» → браузер. Здесь дописывать ничего не надо, просто наблюдаем.</li>
+    <li>На странице тикают часы и есть поле для ввода. Нажми красную кнопку <b>«Заморозить на 3 сек (синхронно)»</b> и сразу попробуй печатать в поле и смотри на часы.</li>
+    <li>Заметила? <b>Часы встали, в поле ничего не печатается</b> ~3 секунды. Это обычный синхронный код (цикл <code>while</code>) — браузер застрял в нём и не может делать больше ничего.</li>
+    <li>Теперь нажми синюю кнопку <b>«Подождать 3 сек (setTimeout)»</b> и снова печатай / смотри на часы. Часы идут, печатать можно — хотя ответ тоже приходит через 3 секунды. Разница только в том, что браузер эти 3 секунды <b>свободен</b>.</li>
+  </ol>
+  <p>Вот <b>ради этого</b> и нужен асинхронный код: чтобы долгие дела (запрос в сеть, таймер) не морозили страницу. Дальше — как его писать.</p>
+</div>
+
+<hr>
+
+<h2>2. Самый простой асинхронный код — таймер</h2>
+
+<p><code>setTimeout(функция, время)</code> говорит: «подожди столько-то миллисекунд, потом выполни эту функцию». 1000 миллисекунд = 1 секунда.</p>
+
+<pre><code>console.log('до таймера');
+
+setTimeout(function () {
+    console.log('прошло 2 секунды!');
+}, 2000);
+
+console.log('после таймера');</code></pre>
+
+<p class="q">В каком порядке появятся строки в консоли?</p>
+
+<div class="timeline">
+  <div class="t"><code>до таймера</code> — сразу</div>
+  <div class="t"><code>после таймера</code> — тоже сразу, <b>не дожидаясь</b> таймера</div>
+  <div class="t"><code>прошло 2 секунды!</code> — через 2 секунды</div>
+</div>
+
+<p>Вот это неожиданно для новичков. <code>setTimeout</code> не останавливает код. Он как будто говорит: «поставил будильник, иду дальше». JavaScript досматривает все оставшиеся строки, и только когда ему станет нечего делать — берётся за отложенную функцию.</p>
+
+<p>Отложенные функции складываются в <b>очередь задач</b> (task queue). JavaScript заглядывает в неё только после того, как доделал весь основной код. Поэтому даже <code>setTimeout(fn, 0)</code> — с нулевой задержкой — не выполнит <code>fn</code> прямо сейчас: она всё равно встанет в конец очереди и подождёт своей очереди.</p>
+
+<p>Смотри, что мы сделали: передали в <code>setTimeout</code> <b>целую функцию</b> как аргумент. Не результат её работы, а саму функцию — чтобы <code>setTimeout</code> вызвал её сам, позже.</p>
+<p>Ты уже так делала и раньше, просто не задумывалась. Вспомни конец своего <code>chat.js</code>:</p>
+<pre><code>document.querySelector('.send-btn').addEventListener('click', sendMessage);</code></pre>
+<p>Здесь <code>sendMessage</code> написано <b>без скобок</b> <code>()</code>. Ты не вызываешь функцию — ты <b>отдаёшь</b> её браузеру, а он вызовет её сам, когда пользователь кликнет по кнопке. С <code>setTimeout</code> то же самое: отдаёшь функцию, а вызовут её через заданное время.</p>
+
+<h3>Родственник — <code>setInterval</code></h3>
+<p>То же самое, но повторяет функцию каждые N миллисекунд, пока не остановишь через <code>clearInterval</code>. Пригодится, если захочешь, например, мигающий индикатор «Печатает…».</p>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 2</div>
+  <span class="path">lesson12_async/example2_timer/</span>
+  <ol>
+    <li>Открой <code>example2_timer/index.html</code> в браузере, нажми <code>F12</code> → вкладка <b>Console</b>. Сейчас там две строки: <code>1 — начало</code> и <code>3 — конец</code>.</li>
+    <li>В <code>example2_timer/script.js</code> найди <code>// ДОПИШИ ЗДЕСЬ</code> и под ней добавь:
+<pre><code>setTimeout(function () {
+    console.log('2 — прошло 2 секунды');
+}, 2000);</code></pre></li>
+    <li>Сохрани (<code>Ctrl+S</code>), обнови страницу (<code>Ctrl+R</code>).</li>
+    <li>Смотри в консоль. В каком порядке пришли три строки? Совпало с таблицей выше?</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>3. Промис (Promise) — «обещание, что ответ будет»</h2>
+
+<p>Когда дело долгое, JavaScript не может вернуть результат сразу — его же ещё нет. Вместо результата он возвращает <b>промис</b>: специальный объект-расписку, «я обещаю, что здесь появится результат… потом».</p>
+
+<p>У промиса три состояния:</p>
+
+<table>
+  <tr><th>Состояние</th><th>Что значит</th></tr>
+  <tr><td><b>pending</b> (ожидание)</td><td>дело ещё идёт, результата нет</td></tr>
+  <tr><td><b>fulfilled</b> (выполнен)</td><td>всё получилось, результат готов</td></tr>
+  <tr><td><b>rejected</b> (отклонён)</td><td>дело сорвалось (например, пропал интернет и запрос вообще не дошёл)</td></tr>
+</table>
+
+<p>Промис начинается в <code>pending</code> и потом <b>один раз</b> переходит либо в <code>fulfilled</code>, либо в <code>rejected</code>. Обратно уже не вернётся.</p>
+
+<h3>Как забрать результат из промиса</h3>
+
+<ul>
+  <li><code>.then(результат =&gt; { ... })</code> — «когда получится, сделай вот это с результатом»</li>
+  <li><code>.catch(ошибка =&gt; { ... })</code> — «если сломается, сделай вот это»</li>
+</ul>
+
+<pre><code>какойТоПромис
+    .then(function (результат) {
+        console.log('готово:', результат);
+    })
+    .catch(function (ошибка) {
+        console.log('облом:', ошибка);
+    });</code></pre>
+
+<div class="box note">
+  <div class="box-title">Про стрелочку <code>=&gt;</code></div>
+  Дальше в коде часто встретится запись вида <code>response =&gt; response.json()</code>. Это просто <b>короткий способ написать функцию</b>: <code>x =&gt; y</code> — то же самое, что <code>function (x) { return y }</code>. В <code>.then</code> и <code>.catch</code> можно писать как захочешь — обе записи работают одинаково.
+</div>
+
+<div class="box analogy">
+  <div class="box-title">Аналогия</div>
+  Промис — это талончик из гардероба. Пальто тебе сразу не отдают, но талончик (обещание) — на руках. <code>.then</code> — это «когда позовут по номеру, забери пальто». <code>.catch</code> — «если пальто потеряли, вот что делать».
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 3</div>
+  <span class="path">lesson12_async/example3_promise/</span>
+  <ol>
+    <li>Открой <code>example3_promise/index.html</code> в браузере, нажми <code>F12</code> → <b>Console</b>.</li>
+    <li>В <code>example3_promise/script.js</code> уже есть функция <code>wait(ms)</code>, которая возвращает промис. Найди <code>// ДОПИШИ ЗДЕСЬ</code> сразу под <code>wait(1500)</code> и впиши:
+<pre><code>    .then(function () {
+        console.log('строка 3 — прошло 1.5 секунды');
+    })</code></pre></li>
+    <li>Сохрани, обнови страницу. В консоли: <code>строка 1</code> и <code>строка 2</code> появляются сразу, а <code>строка 3</code> — через полторы секунды.</li>
+    <li>Подумай: обычные <code>console.log</code> сработали сразу, а тот, что внутри <code>.then</code>, — только когда промис <code>wait(1500)</code> дождался своих 1.5 секунды. Почему?</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>4. Теперь читаем твой <code>fetch</code> по строчкам</h2>
+
+<p>Вот кусок из твоего <code>chat.js</code>. Раньше он был непонятной магией — сейчас пройдём по нему.</p>
+
+<pre><code>loaderIndicator.classList.remove('hidden')   // 1. показали надпись "ИИ печатает..."
+
+fetch("https://api.deepseek.com/chat/completions", {   // 2. отправили запрос
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + API_KEY
+    },
+    body: JSON.stringify({
+        model: "deepseek-v4-flash",
+        messages: [ { role: "user", content: userText } ]
+    })
+})
+    .then(response =&gt; response.json())   // 3. пришёл ответ — превращаем в объект
+    .then(data =&gt; {                       // 4. теперь работаем с данными
+        loaderIndicator.classList.add('hidden')       // спрятали надпись
+        const reply = data.choices[0].message.content;
+        // ...добавляем сообщение ИИ на страницу...
+    });</code></pre>
+
+<ol class="steps">
+  <li><b>Показали надпись «ИИ печатает…».</b> В твоём проекте это <code>&lt;p class="loader hidden"&gt;ИИ печатает...&lt;/p&gt;</code>. Мы знаем, что дальше будет ожидание, поэтому заранее снимаем с неё класс <code>hidden</code>, чтобы пользователь видел — ответ грузится.</li>
+  <li><b><code>fetch(...)</code> отправляет запрос и сразу возвращает промис</b> (состояние <code>pending</code>). Ответа от нейросети ещё нет! Код не ждёт — он идёт дальше, страница остаётся живой.</li>
+  <li><b>Первый <code>.then</code>.</b> Когда сервер ответил, промис становится <code>fulfilled</code>, и мы получаем <code>response</code> — «сырой» ответ. Чтобы достать из него JSON, вызываем <code>response.json()</code>. <b>Важно:</b> <code>.json()</code> — это <u>тоже</u> долгая операция, она тоже возвращает промис. Поэтому нужен ещё один <code>.then</code>.</li>
+  <li><b>Второй <code>.then</code>.</b> Вот здесь у нас наконец готовый объект <code>data</code>. Прячем надпись «ИИ печатает…», достаём текст ответа <code>data.choices[0].message.content</code> и выводим на страницу.</li>
+</ol>
+
+<div class="box warn">
+  <div class="box-title">Почему два <code>.then</code> подряд</div>
+  Первый распаковывает ответ сети в JSON (тоже промис), второй — работает с уже готовыми данными. Каждый <code>.then</code> «ждёт», пока предыдущий закончится, и передаёт результат дальше по цепочке.
+</div>
+
+<h3>Чего в твоём коде не хватает — <code>.catch</code></h3>
+
+<p>Сейчас что-то может пойти не так двумя способами:</p>
+<ul>
+  <li><b>Пропал интернет</b> — запрос вообще не дошёл, промис от <code>fetch</code> становится <code>rejected</code>.</li>
+  <li><b>Сервер ответил, но не тем, чего мы ждём</b> (ошибка ключа, лимит запросов). Тогда <code>fetch</code> считает, что всё хорошо — ответ же пришёл! — но в <code>data</code> не будет поля <code>choices</code>, и строчка <code>data.choices[0].message.content</code> упадёт с ошибкой.</li>
+</ul>
+<p>В обоих случаях без обработки надпись «ИИ печатает…» <b>останется висеть навсегда</b>, а в консоли будет красная ошибка. <code>.catch</code> в конце цепочки ловит и то, и другое — добавь его:</p>
+
+<pre><code>    .catch(error =&gt; {
+        loaderIndicator.classList.add('hidden');
+        messagesBox.innerHTML += '&lt;p class="msg msg-ai"&gt;Ошибка, попробуй ещё раз&lt;/p&gt;';
+        console.log(error);
+    });</code></pre>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 4</div>
+  <span class="path">lesson12_async/example4_fetch/</span>
+  <p>Твой чат требует ключ, поэтому тренируемся на копии той же схемы. Настоящего интернета тут нет: в <code>script.js</code> есть функция <code>fakeRequest()</code> — она ведёт себя <b>точно как <code>fetch</code></b> (возвращает промис, у ответа есть <code>.json()</code>), но работает у тебя на компьютере.</p>
+  <ol>
+    <li>Открой <code>example4_fetch/index.html</code> в браузере, нажми кнопку <b>«Запросить»</b> — через секунду появится ответ. Это цепочка с двумя <code>.then</code>, как в твоём <code>chat.js</code>.</li>
+    <li>Открой <code>example4_fetch/script.js</code>. В конце цепочки уже есть пустой <code>.catch(error =&gt; { ... })</code>. Найди внутри него <code>// ДОПИШИ ЗДЕСЬ</code> и впиши:
+<pre><code>            answerBox.textContent = 'Ошибка загрузки';
+            statusBox.textContent = '';
+            console.log(error);</code></pre></li>
+    <li>Сохрани, обнови страницу. Поставь галочку <b>«сломать ответ»</b> и нажми «Запросить» — теперь <code>fakeRequest()</code> вернёт промис в состоянии <code>rejected</code>, и сработает твой <code>.catch</code>: появится «Ошибка загрузки».</li>
+    <li>А теперь посмотри, что бывает <b>совсем без</b> <code>.catch</code>. Выдели всю строчку <code>.catch(error =&gt; { ... });</code> целиком (все её строки) и закомментируй — в VS Code это <code>Ctrl + /</code>. Сохрани, обнови, нажми «Запросить» с галочкой: «Загрузка...» так и висит, а в консоли — красная ошибка <code>Uncaught (in promise)</code>. Никто не поймал reject. Верни <code>.catch</code> обратно (<code>Ctrl + /</code> ещё раз).</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>5. Современная запись — <code>async / await</code></h2>
+
+<p>Цепочки <code>.then().then().then()</code> тяжело читать. В новом JavaScript есть способ написать асинхронный код так, будто он обычный, сверху вниз.</p>
+
+<ul>
+  <li>Перед функцией пишем слово <code>async</code> — «внутри будет ожидание».</li>
+  <li>Перед промисом пишем <code>await</code> — «подожди тут результат, потом иди дальше». Строчка ниже не выполнится, пока не придёт ответ — но страница при этом <b>не зависает</b>.</li>
+</ul>
+
+<pre><code>async function sendMessage() {
+    // ...показали надпись "ИИ печатает..."...
+
+    try {
+        const response = await fetch("https://api.deepseek.com/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + API_KEY
+            },
+            body: JSON.stringify({
+                model: "deepseek-v4-flash",
+                messages: [ { role: "user", content: userText } ]
+            })
+        });
+
+        const data = await response.json();   // ждём распаковку
+
+        loaderIndicator.classList.add('hidden');
+        const reply = data.choices[0].message.content;
+        // ...выводим ответ на страницу...
+    } catch (error) {
+        loaderIndicator.classList.add('hidden');
+        console.log('Ошибка:', error);
+    }
+}</code></pre>
+
+<p>Это <b>тот же самый код</b>, что с <code>.then</code> — просто читается как обычный рассказ: «отправь запрос → <u>дождись</u> ответа → <u>дождись</u> распаковки → покажи». <code>try/catch</code> здесь играет роль <code>.catch</code>.</p>
+
+<div class="box note">
+  <div class="box-title">Запомни</div>
+  <code>await</code> работает только внутри функции, помеченной <code>async</code>. «Ждёт» он по-умному: пауза только для этой функции, а браузер в это время спокойно реагирует на клики и прокрутку.
+</div>
+
+<h3>Бонус — <code>finally</code></h3>
+<p>Заметь: строчку «спрятать надпись» пришлось написать <b>дважды</b> — и в <code>try</code>, и в <code>catch</code>. Чтобы не дублировать, есть третий блок — <code>finally</code>. Он выполняется <b>в любом случае</b>: и когда всё получилось, и когда была ошибка.</p>
+
+<pre><code>    try {
+        const response = await fetch(...);
+        const data = await response.json();
+        // ...показать ответ...
+    } catch (error) {
+        // ...показать ошибку...
+    } finally {
+        loaderIndicator.classList.add('hidden');   // спрячется всегда
+    }</code></pre>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 5</div>
+  <span class="path">lesson12_async/example5_async_await/</span>
+  <ol>
+    <li>Открой <code>example5_async_await/index.html</code> в браузере, нажми кнопку — работает так же, как пример 4.</li>
+    <li>Открой рядом <b>два файла</b>: <code>example4_fetch/script.js</code> и <code>example5_async_await/script.js</code>. Это один и тот же запрос, записанный двумя способами. Прочитай оба сверху вниз и сравни.</li>
+    <li>В <code>example5_async_await/script.js</code> строчка <code>statusBox.textContent = ''</code> написана дважды — в <code>try</code> и в <code>catch</code> (помечены «строчка 1» и «строчка 2»). Убери обе, а закрывающую <code>}</code> у <code>catch</code> замени на <code>} finally { ... }</code>. Должно получиться так:
+<pre><code>    try {
+        const response = await fakeRequest();
+        const data = await response.json();
+        answerBox.textContent = data.text;
+    } catch (error) {
+        answerBox.textContent = 'Ошибка загрузки';
+        console.log(error);
+    } finally {
+        statusBox.textContent = '';   // выполнится в любом случае
+    }</code></pre></li>
+    <li>Сохрани, обнови. Проверь оба случая: без галочки (приходит ответ) и с галочкой «сломать ответ» (появляется «Ошибка загрузки», а «Загрузка...» пропадает — потому что <code>finally</code> срабатывает всегда).</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>6. Быстрая проверка себя</h2>
+
+<ol>
+  <li>Что выведет <code>console.log</code> раньше — строка после <code>setTimeout(fn, 0)</code> или сама <code>fn</code>? <i>(Подсказка: отложенная функция всегда уходит в конец очереди, даже с нулём.)</i></li>
+  <li>Сколько состояний у промиса и может ли <code>fulfilled</code> потом стать <code>rejected</code>?</li>
+  <li>Зачем в <code>fetch</code>-цепочке два <code>.then</code>, а не один?</li>
+  <li>Что случится с надписью «ИИ печатает…» в твоём чате, если сервер вернёт ошибку, а <code>.catch</code> ты не добавила?</li>
+</ol>
+
+<hr>
+
+<div class="hw">
+<h2>Домашнее задание</h2>
+<ol>
+  <li><b>Таймер.</b> В консоли браузера напиши три <code>console.log</code> и между ними <code>setTimeout</code> на 3 секунды. Убедись, что порядок вывода такой, как в уроке. Покажи результат наставнику.</li>
+  <li><b>Защити чат.</b> Добавь <code>.catch</code> в конец <code>fetch</code>-цепочки в своём <code>chat.js</code> (код выше). Проверь: выключи интернет, отправь сообщение — надпись «ИИ печатает…» должна спрятаться, а не висеть.</li>
+  <li><b>Перепиши на async/await.</b> Возьми <code>sendMessage</code> и перепиши его с <code>.then</code> на <code>async/await</code> (образец в разделе 5). Сравни с наставником, какой вариант тебе понятнее.</li>
+  <li><b>Добавь <code>finally</code>.</b> В своём варианте с <code>async/await</code> убери две одинаковые строчки <code>loaderIndicator.classList.add('hidden')</code> из <code>try</code> и <code>catch</code> и вынеси их в один <code>finally</code>. Проверь, что надпись прячется и при успехе, и при ошибке.</li>
+</ol>
+</div>
+
+<hr>
+
+<h2>Источники</h2>
+<ul>
+  <li><a href="https://developer.mozilla.org/ru/docs/Learn/JavaScript/Asynchronous" target="_blank" rel="noopener noreferrer">MDN — Асинхронный JavaScript</a></li>
+  <li><a href="https://learn.javascript.ru/promise-basics" target="_blank" rel="noopener noreferrer">learn.javascript.ru — Промисы</a></li>
+  <li><a href="https://learn.javascript.ru/async-await" target="_blank" rel="noopener noreferrer">learn.javascript.ru — async/await</a></li>
+</ul>
+
+</div>
+</body>
+</html>
