@@ -32,18 +32,21 @@ async function load() {
         const response = await fakeRequest();     // ждём "ответ"
         const data = await response.json();       // ждём распаковку
         answerBox.textContent = data.text;
-        statusBox.textContent = '';               // <-- строчка 1 (после успеха)
+        statusBox.textContent = '';               // <-- ЭТА строка (прячем "Загрузка..." после успеха)
     } catch (error) {
         answerBox.textContent = 'Ошибка загрузки';
-        statusBox.textContent = '';               // <-- строчка 2 (после ошибки) — ДУБЛЬ
+        statusBox.textContent = '';               // <-- И ЭТА — точно такая же (после ошибки). Дублируем!
         console.log(error);
     }
 
-    // ЗАДАНИЕ: убери строчку 1 и строчку 2, а закрывающую } у catch замени на:
-    //   } finally {
-    //       statusBox.textContent = '';   // выполнится в любом случае
-    //   }
-    // (то есть блоков становится три: try { } catch (error) { } finally { })
+    // ЗАДАНИЕ: обе строки  statusBox.textContent = ''  (в try и в catch, помечены выше)
+    // делают одно и то же. Убери их обе, а закрывающую } у catch замени на блок finally.
+    // Было:                        Стало:
+    //   } catch (error) {            } catch (error) {
+    //       ...                          ...
+    //   }                            } finally {
+    //                                    statusBox.textContent = '';   // сработает в любом случае
+    //                                }
 }
 
 document.querySelector('.load-btn').addEventListener('click', load);

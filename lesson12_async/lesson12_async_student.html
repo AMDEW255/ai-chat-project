@@ -496,7 +496,7 @@ fetch("https://api.deepseek.com/chat/completions", {   // 2. отправили 
   <ol>
     <li>Открой <code>example5_async_await/index.html</code> в браузере, нажми кнопку — работает так же, как пример 4.</li>
     <li>Открой рядом <b>два файла</b>: <code>example4_fetch/script.js</code> и <code>example5_async_await/script.js</code>. Это один и тот же запрос, записанный двумя способами. Прочитай оба сверху вниз и сравни.</li>
-    <li>В <code>example5_async_await/script.js</code> строчка <code>statusBox.textContent = ''</code> написана дважды — в <code>try</code> и в <code>catch</code> (помечены «строчка 1» и «строчка 2»). Убери обе, а закрывающую <code>}</code> у <code>catch</code> замени на <code>} finally { ... }</code>. Должно получиться так:
+    <li>В <code>example5_async_await/script.js</code> строчка <code>statusBox.textContent = ''</code> написана дважды — в <code>try</code> и в <code>catch</code> (в файле обе помечены комментарием <code>&lt;-- ЭТА строка</code>). Убери обе, а закрывающую <code>}</code> у <code>catch</code> замени на <code>} finally { ... }</code>. Должно получиться так:
 <pre><code>    try {
         const response = await fakeRequest();
         const data = await response.json();
