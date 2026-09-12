@@ -1,5 +1,6 @@
+const API_KEY = ''
+
 // Сохранять сообщения в localStorage
- 
 function createMessage(text, sender) {
     return {
         text,
@@ -7,7 +8,7 @@ function createMessage(text, sender) {
         sender
     }
 }
- 
+
 function sendMessage() {
     const loaderIndicator = document.querySelector('.loader');
     const input = document.querySelector('.user-input');
@@ -81,7 +82,6 @@ function sendMessage() {
     })
     .then(response => response.json())
     .then(data => {
-        loaderIndicator.classList.add('hidden')
         const reply = data.choices[0].message.content;
         const aiMessage = createMessage(reply, 'ИИ:');
 
@@ -108,7 +108,13 @@ function sendMessage() {
                 </span>
             </p>
         `;
-    });
+    })
+    .catch((e) => {
+        console.error(e)
+    })
+    .finally(() => {
+        loaderIndicator.classList.add('hidden')
+    })
 }
  
 function clearMessage() {
