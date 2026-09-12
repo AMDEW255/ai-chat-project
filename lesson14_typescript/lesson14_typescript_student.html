@@ -4,211 +4,218 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Урок 14 — TypeScript: типы поверх твоего JavaScript</title>
-<style>
-  :root {
-    --bg: #fbf9f5;
-    --card: #ffffff;
-    --text: #24211d;
-    --muted: #6b6459;
-    --accent: #c2410c;
-    --accent-soft: #fff1e7;
-    --line: #e7e1d6;
-    --code-bg: #2d2a26;
-    --code-text: #f4efe7;
-    --ok: #15803d;
-    --ok-soft: #eafaf0;
-    --warn: #b45309;
-    --warn-soft: #fdf4e3;
+<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/devicon@2.15.1/icons/typescript/typescript-original.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          display: ['"Space Grotesk"', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+      },
+    },
   }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.7;
-    font-size: 17px;
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    * { box-sizing: border-box; }
+    body {
+      @apply bg-slate-950 text-slate-300 font-sans antialiased;
+      line-height: 1.7;
+      font-size: 17px;
+      background-image: radial-gradient(circle at 1px 1px, rgba(148,163,184,0.16) 1px, transparent 0);
+      background-size: 26px 26px;
+    }
+    h1 {
+      @apply font-display text-3xl md:text-4xl font-semibold tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent;
+      line-height: 1.25;
+      margin: 14px 0 6px;
+    }
+    h2 {
+      @apply font-display text-2xl font-semibold text-white flex items-center gap-3;
+      margin: 48px 0 14px;
+      padding-top: 8px;
+    }
+    h2::before { content: ''; @apply w-6 h-[3px] rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 shrink-0; }
+    h3 { @apply font-display text-lg font-semibold text-cyan-300; margin: 28px 0 8px; }
+    p { margin: 12px 0; }
+    .lead { @apply text-slate-400; font-size: 18px; }
+    hr { @apply border-t border-slate-800; border-style: solid; margin: 40px 0; }
+    code {
+      @apply bg-slate-900 text-cyan-200 border border-slate-800 rounded-md font-mono;
+      padding: 2px 7px;
+      font-size: 15px;
+    }
+    pre {
+      @apply bg-black/60 text-slate-100 border border-slate-800 rounded-xl font-mono relative;
+      padding: 30px 20px 18px;
+      overflow-x: auto;
+      font-size: 14.5px;
+      line-height: 1.6;
+      box-shadow: 0 10px 40px -18px rgba(34,211,238,0.35);
+    }
+    pre::before {
+      content: '● ● ●';
+      @apply absolute top-3 left-4 text-slate-700;
+      font-size: 10px;
+      letter-spacing: 5px;
+    }
+    pre code { @apply bg-transparent border-none text-inherit; padding: 0; font-size: inherit; }
+    a { @apply text-cyan-300 hover:text-cyan-200 underline decoration-cyan-800 underline-offset-2; }
+    table { @apply w-full border-collapse; margin: 18px 0; font-size: 15.5px; }
+    th, td { @apply border border-slate-800 align-top text-left; padding: 10px 12px; }
+    th { @apply bg-slate-900 text-slate-200 font-display uppercase tracking-wide; font-size: 13px; }
   }
-  .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 48px 24px 96px;
-  }
-  header.lesson {
-    border-bottom: 3px solid var(--accent);
-    padding-bottom: 20px;
-    margin-bottom: 8px;
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  header.lesson { @apply border-b border-slate-800 relative; padding-bottom: 20px; margin-bottom: 8px; }
+  header.lesson::after {
+    content: '';
+    @apply absolute left-0 h-px w-40 bg-gradient-to-r from-cyan-400 via-violet-500 to-transparent;
+    bottom: -1px;
   }
   header.lesson .tag {
-    display: inline-block;
-    background: var(--accent-soft);
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
+    @apply inline-block bg-slate-900 text-cyan-300 border border-cyan-800/50 font-mono font-medium uppercase rounded;
+    font-size: 12px;
+    letter-spacing: .15em;
     padding: 4px 10px;
-    border-radius: 6px;
   }
-  h1 {
-    font-size: 30px;
-    line-height: 1.25;
-    margin: 14px 0 6px;
-  }
-  h2 {
-    font-size: 22px;
-    margin: 44px 0 12px;
-    padding-top: 8px;
-  }
-  h3 {
-    font-size: 18px;
-    margin: 28px 0 8px;
-    color: var(--accent);
-  }
-  p { margin: 12px 0; }
-  .lead { color: var(--muted); font-size: 18px; }
-  hr {
-    border: none;
-    border-top: 1px solid var(--line);
-    margin: 40px 0;
-  }
-  code {
-    background: #f0ece2;
-    padding: 2px 6px;
-    border-radius: 5px;
-    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
-    font-size: 15px;
-  }
-  pre {
-    background: var(--code-bg);
-    color: var(--code-text);
-    padding: 18px 20px;
-    border-radius: 12px;
-    overflow-x: auto;
-    font-size: 14.5px;
-    line-height: 1.6;
-  }
-  pre code {
-    background: none;
-    padding: 0;
-    color: inherit;
-    font-size: inherit;
-  }
-  .box {
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin: 20px 0;
-    border: 1px solid var(--line);
-  }
-  .box.analogy { background: var(--accent-soft); border-color: #f3d9c6; }
-  .box.note { background: var(--ok-soft); border-color: #c7ebd4; }
-  .box.warn { background: var(--warn-soft); border-color: #f0dcb4; }
-  .box .box-title {
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    margin-bottom: 6px;
-  }
-  .box.analogy .box-title { color: var(--accent); }
-  .box.note .box-title { color: var(--ok); }
-  .box.warn .box-title { color: var(--warn); }
+
+  .box { @apply rounded-xl border backdrop-blur-sm; padding: 16px 20px; margin: 20px 0; }
+  .box.analogy { @apply border-violet-500/30; background: rgba(139,92,246,0.06); }
+  .box.note { @apply border-emerald-500/30; background: rgba(16,185,129,0.06); }
+  .box.warn { @apply border-amber-500/30; background: rgba(245,158,11,0.07); }
+  .box .box-title { @apply font-display font-semibold uppercase; font-size: 13px; letter-spacing: .08em; margin-bottom: 6px; }
+  .box.analogy .box-title { @apply text-violet-300; }
+  .box.note .box-title { @apply text-emerald-300; }
+  .box.warn .box-title { @apply text-amber-300; }
+
   ol, ul { padding-left: 24px; }
   li { margin: 8px 0; }
-  .steps {
-    counter-reset: step;
-    list-style: none;
-    padding-left: 0;
-  }
-  .steps > li {
-    counter-increment: step;
-    position: relative;
-    padding-left: 44px;
-    margin: 16px 0;
-  }
+
+  .steps { counter-reset: step; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: step; position: relative; padding-left: 44px; margin: 16px 0; }
   .steps > li::before {
     content: counter(step);
-    position: absolute;
+    @apply absolute flex items-center justify-center rounded-full text-white font-display font-semibold bg-gradient-to-br from-cyan-400 to-violet-500;
     left: 0;
     top: 0;
     width: 30px;
     height: 30px;
-    background: var(--accent);
-    color: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
     font-size: 15px;
+    box-shadow: 0 0 14px rgba(34,211,238,0.5);
   }
-  .timeline {
-    border-left: 3px solid var(--line);
-    padding-left: 20px;
-    margin: 20px 0;
-  }
-  .timeline .t {
-    position: relative;
-    margin: 14px 0;
-  }
+
+  .timeline { @apply border-l-2 border-slate-800; padding-left: 20px; margin: 20px 0; }
+  .timeline .t { position: relative; margin: 14px 0; }
   .timeline .t::before {
-    content: "";
-    position: absolute;
+    content: '';
+    @apply absolute rounded-full bg-cyan-400;
     left: -27px;
     top: 8px;
     width: 11px;
     height: 11px;
-    background: var(--accent);
-    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(34,211,238,0.85);
   }
-  .q { font-weight: 700; }
-  a { color: var(--accent); }
+
+  .q { @apply font-semibold text-white; }
+
   .hw {
-    background: var(--card);
-    border: 2px solid var(--accent);
-    border-radius: 14px;
+    @apply border border-cyan-800/40 rounded-2xl;
+    background: rgba(15,23,42,0.6);
     padding: 8px 24px 20px;
     margin-top: 24px;
+    box-shadow: 0 0 44px -18px rgba(34,211,238,0.3);
   }
+
   .practice {
-    background: var(--accent-soft);
-    border: 1px solid #f3d9c6;
-    border-left: 5px solid var(--accent);
-    border-radius: 10px;
+    @apply border border-slate-800 rounded-xl;
+    border-left: 4px solid #22d3ee;
+    background: rgba(15,23,42,0.5);
     padding: 6px 22px 18px;
     margin: 24px 0;
   }
   .practice .box-title {
-    font-weight: 700;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--accent);
+    @apply font-display font-semibold uppercase text-cyan-300;
+    font-size: 13px;
+    letter-spacing: .08em;
     margin: 14px 0 4px;
   }
   .practice .path {
-    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
+    @apply font-mono bg-black/60 border border-slate-800 text-cyan-200 rounded-md inline-block;
     font-size: 14px;
-    background: #fff;
-    border: 1px solid #f0dcc7;
     padding: 6px 10px;
-    border-radius: 6px;
-    display: inline-block;
     margin-bottom: 4px;
   }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 18px 0;
-    font-size: 15.5px;
+</style>
+<style>
+  /* Код рендерит настоящий Monaco Editor (движок VS Code), см. script перед </body> */
+  .monaco-mount { width: 100%; }
+  pre:has(.monaco-mount) { overflow: hidden; }
+
+  /* Ярлык языка в углу блока с кодом */
+  pre[data-lang] { padding-right: 64px; }
+  pre[data-lang]::after {
+    content: attr(data-lang);
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #64748b;
   }
-  th, td {
-    border: 1px solid var(--line);
-    padding: 10px 12px;
-    text-align: left;
-    vertical-align: top;
+
+  /* Иконки (маски по currentColor) для заголовков плашек */
+  header.lesson .tag { display: inline-flex; align-items: center; gap: 6px; }
+  header.lesson .tag::before,
+  .box.note .box-title::before,
+  .box.analogy .box-title::before,
+  .box.warn .box-title::before,
+  .hw h2::after {
+    content: '';
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background-color: currentColor;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    vertical-align: -2px;
   }
-  th { background: #f0ece2; }
+  .box .box-title { display: flex; align-items: center; gap: 7px; }
+  .hw h2 { display: flex; align-items: center; gap: 10px; }
+  header.lesson .tag::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%2216%2018%2022%2012%2016%206%22%3E%3C%2Fpolyline%3E%3Cpolyline%20points%3D%228%206%202%2012%208%2018%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%2216%2018%2022%2012%2016%206%22%3E%3C%2Fpolyline%3E%3Cpolyline%20points%3D%228%206%202%2012%208%2018%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+  }
+  .box.note .box-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%3E%3C%2Fcircle%3E%3Cline%20x1%3D%2212%22%20y1%3D%2216%22%20x2%3D%2212%22%20y2%3D%2212%22%3E%3C%2Fline%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212.01%22%20y2%3D%228%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%3E%3C%2Fcircle%3E%3Cline%20x1%3D%2212%22%20y1%3D%2216%22%20x2%3D%2212%22%20y2%3D%2212%22%3E%3C%2Fline%3E%3Cline%20x1%3D%2212%22%20y1%3D%228%22%20x2%3D%2212.01%22%20y2%3D%228%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+  }
+  .box.analogy .box-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2011.5a8.38%208.38%200%200%201-.9%203.8%208.5%208.5%200%200%201-7.6%204.7%208.38%208.38%200%200%201-3.8-.9L3%2021l1.9-5.7a8.38%208.38%200%200%201-.9-3.8%208.5%208.5%200%200%201%204.7-7.6%208.38%208.38%200%200%201%203.8-.9h.5a8.48%208.48%200%200%201%208%208v.5z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M21%2011.5a8.38%208.38%200%200%201-.9%203.8%208.5%208.5%200%200%201-7.6%204.7%208.38%208.38%200%200%201-3.8-.9L3%2021l1.9-5.7a8.38%208.38%200%200%201-.9-3.8%208.5%208.5%200%200%201%204.7-7.6%208.38%208.38%200%200%201%203.8-.9h.5a8.48%208.48%200%200%201%208%208v.5z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E");
+  }
+  .box.warn .box-title::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.29%203.86L1.82%2018a2%202%200%200%200%201.71%203h16.94a2%202%200%200%200%201.71-3L13.71%203.86a2%202%200%200%200-3.42%200z%22%3E%3C%2Fpath%3E%3Cline%20x1%3D%2212%22%20y1%3D%229%22%20x2%3D%2212%22%20y2%3D%2213%22%3E%3C%2Fline%3E%3Cline%20x1%3D%2212%22%20y1%3D%2217%22%20x2%3D%2212.01%22%20y2%3D%2217%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10.29%203.86L1.82%2018a2%202%200%200%200%201.71%203h16.94a2%202%200%200%200%201.71-3L13.71%203.86a2%202%200%200%200-3.42%200z%22%3E%3C%2Fpath%3E%3Cline%20x1%3D%2212%22%20y1%3D%229%22%20x2%3D%2212%22%20y2%3D%2213%22%3E%3C%2Fline%3E%3Cline%20x1%3D%2212%22%20y1%3D%2217%22%20x2%3D%2212.01%22%20y2%3D%2217%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+  }
+  .hw h2::after {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2015s1-1%204-1%205%202%208%202%204-1%204-1V3s-1%201-4%201-5-2-8-2-4%201-4%201z%22%3E%3C%2Fpath%3E%3Cline%20x1%3D%224%22%20y1%3D%2222%22%20x2%3D%224%22%20y2%3D%2215%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2015s1-1%204-1%205%202%208%202%204-1%204-1V3s-1%201-4%201-5-2-8-2-4%201-4%201z%22%3E%3C%2Fpath%3E%3Cline%20x1%3D%224%22%20y1%3D%2222%22%20x2%3D%224%22%20y2%3D%2215%22%3E%3C%2Fline%3E%3C%2Fsvg%3E");
+    color: #22d3ee;
+  }
 </style>
 </head>
 <body>
@@ -216,7 +223,7 @@
 
 <header class="lesson">
   <span class="tag">Урок 14</span>
-  <h1>TypeScript — типы поверх твоего JavaScript</h1>
+  <h1><img src="https://cdn.jsdelivr.net/npm/devicon@2.15.1/icons/typescript/typescript-original.svg" alt="" width="34" height="34" style="display:inline-block;vertical-align:-5px;border-radius:7px;margin-right:10px;"> TypeScript — типы поверх твоего JavaScript</h1>
   <p class="lead">Дальше на курсе будет React, а почти весь React-код в реальных проектах пишут на TypeScript. Это два быстрых урока, чтобы прочитать чужой TS-код и писать свой на базовом уровне — без глубокого погружения, ровно чтобы не спотыкаться в React.</p>
 </header>
 
@@ -241,13 +248,13 @@
   <ol>
     <li>Открой терминал в VS Code (меню <b>Terminal → New Terminal</b>) и перейди в корень своего проекта (папка <code>ai-chat-project-fresh</code>, где лежат <code>chat.js</code>, <code>lesson12_async</code> и т.д.).</li>
     <li>Выполни команду:
-<pre><code>npm create vite@latest lesson14_typescript -- --template vanilla-ts</code></pre>
+<pre class="language-bash" data-lang="bash"><code class="language-bash">npm create vite@latest lesson14_typescript -- --template vanilla-ts</code></pre>
     Она создаст новую папку <code>lesson14_typescript</code> рядом с <code>lesson12_async</code>, с заготовкой TypeScript-проекта внутри.</li>
     <li>Перейди в неё и поставь зависимости:
-<pre><code>cd lesson14_typescript
+<pre class="language-bash" data-lang="bash"><code class="language-bash">cd lesson14_typescript
 npm install</code></pre></li>
     <li>Запусти локальный сервер:
-<pre><code>npm run dev</code></pre>
+<pre class="language-bash" data-lang="bash"><code class="language-bash">npm run dev</code></pre>
     В терминале появится адрес вида <code>http://localhost:5173/</code> — открой его в браузере. Сервер остаётся работать, пока не нажмёшь <code>Ctrl+C</code> в терминале — не закрывай эту вкладку терминала весь урок.</li>
     <li>Ты увидишь дефолтную страницу Vite со счётчиком — это просто шаблон-заглушка, шаг 5 её уберёт.</li>
   </ol>
@@ -263,7 +270,7 @@ npm install</code></pre></li>
   <ol>
     <li>В папке <code>src</code> удали файл <code>counter.ts</code> и папку <code>assets</code> — это демо-контент, он не нужен.</li>
     <li>Открой <code>index.html</code> в корне проекта и замени всё содержимое на:
-<pre><code>&lt;!doctype html&gt;
+<pre class="language-markup" data-lang="html"><code class="language-markup">&lt;!doctype html&gt;
 &lt;html lang="ru"&gt;
   &lt;head&gt;
     &lt;meta charset="UTF-8" /&gt;
@@ -277,7 +284,7 @@ npm install</code></pre></li>
   &lt;/body&gt;
 &lt;/html&gt;</code></pre></li>
     <li>Открой <code>src/main.ts</code>, удали всё, оставь одну строку:
-<pre><code>console.log('main.ts работает')</code></pre></li>
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">console.log('main.ts работает')</code></pre></li>
     <li>Сохрани оба файла. Вкладка в браузере обновится сама (это и есть та самая мгновенная пересборка Vite). Открой консоль (<code>F12</code>) — увидишь строку из <code>main.ts</code>.</li>
     <li>Внутри <code>src</code> создай папку <code>examples</code> — в неё дальше будешь класть файлы с примерами этого урока.</li>
   </ol>
@@ -289,14 +296,14 @@ npm install</code></pre></li>
 
 <p>В обычном JavaScript переменная может в любой момент стать чем угодно:</p>
 
-<pre><code>let age = 25;
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">let age = 25;
 age = 'двадцать шесть'; // JS не против, ошибки не будет</code></pre>
 
 <p>Это работает, пока код маленький. Но если <code>age</code> потом используют в математике (<code>age + 1</code>) — программа не упадёт сразу, а тихо сломается где-то дальше, и искать причину придётся уже <i>после</i> того, как это увидел пользователь.</p>
 
 <p>TypeScript даёт способ сказать заранее: «эта переменная — всегда число», и если кто-то (в том числе ты сама через месяц) попробует положить туда строку — TypeScript укажет на ошибку сразу в редакторе, до запуска.</p>
 
-<pre><code>let age: number = 25;
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">let age: number = 25;
 age = 'двадцать шесть'; // ошибка типа — увидишь сразу</code></pre>
 
 <div class="box analogy">
@@ -309,7 +316,7 @@ age = 'двадцать шесть'; // ошибка типа — увидишь
   <span class="path">src/examples/example1_first_error.ts</span>
   <ol>
     <li>Создай в <code>src/examples/</code> файл <code>example1_first_error.ts</code> с содержимым:
-<pre><code>// ПРИМЕР 1 — зачем нужен TypeScript
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">// ПРИМЕР 1 — зачем нужен TypeScript
 export function run() {
     let age: number = 25;
     console.log('возраст:', age);
@@ -318,13 +325,13 @@ export function run() {
     console.log('возраст после дня рождения:', age);
 }</code></pre></li>
     <li>Открой <code>src/main.ts</code> и замени содержимое на:
-<pre><code>import { run } from './examples/example1_first_error'
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">import { run } from './examples/example1_first_error'
 
 run()</code></pre></li>
     <li>Сохрани, открой консоль в браузере — увидишь два <code>console.log</code>. Ошибок нет: <code>26</code> — тоже число, всё по правилам.</li>
     <li>Теперь сломай нарочно: замени строку <code>age = 26;</code> на <code>age = 'двадцать шесть';</code>. Посмотри на редактор — под этой строкой появится красная волнистая линия. Наведи курсор — увидишь текст ошибки.</li>
     <li>В терминале (в новой вкладке терминала, не останавливая <code>npm run dev</code>) выполни:
-<pre><code>npx tsc --noEmit</code></pre>
+<pre class="language-bash" data-lang="bash"><code class="language-bash">npx tsc --noEmit</code></pre>
     Увидишь ту же ошибку текстом: <code>Type 'string' is not assignable to type 'number'</code>.</li>
     <li>Верни <code>age = 26;</code> обратно и убедись, что ошибка пропала.</li>
   </ol>
@@ -347,7 +354,7 @@ run()</code></pre></li>
 
 <p>Часто тип можно вообще не писать — TypeScript сам его угадывает по значению справа (это называется <b>вывод типа</b>, type inference):</p>
 
-<pre><code>let city = 'Киев'; // TypeScript сам понял: это string</code></pre>
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">let city = 'Киев'; // TypeScript сам понял: это string</code></pre>
 
 <p>Явно писать тип полезно там, где значения ещё нет — например, у параметров функции (увидишь в разделе 4).</p>
 
@@ -361,7 +368,7 @@ run()</code></pre></li>
   <span class="path">src/examples/example2_basic_types.ts</span>
   <ol>
     <li>Создай файл с содержимым:
-<pre><code>// ПРИМЕР 2 — базовые типы и массивы
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">// ПРИМЕР 2 — базовые типы и массивы
 export function run() {
     const city: string = 'Киев';
     const usersCount: number = 12;
@@ -391,7 +398,7 @@ export function run() {
 
 <p>Объекты — это то, с чем ты работаешь постоянно (вспомни <code>createMessage</code> в своём <code>chat.js</code>, который возвращает объект с полями <code>text</code>, <code>time</code>, <code>sender</code>). В TypeScript можно заранее описать, какие поля обязаны быть у объекта и какого они типа — через <code>interface</code>:</p>
 
-<pre><code>interface User {
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">interface User {
     name: string;
     age: number;
 }
@@ -407,7 +414,7 @@ const user: User = {
 
 <p>Если поле есть не у всех объектов этого вида, ставь после его имени <code>?</code>:</p>
 
-<pre><code>interface User {
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">interface User {
     name: string;
     age: number;
     isAdmin?: boolean; // может отсутствовать
@@ -426,7 +433,7 @@ const user2: User = { name: 'Игорь', age: 30, isAdmin: true }; // тоже 
   <span class="path">src/examples/example3_objects_interfaces.ts</span>
   <ol>
     <li>Создай файл:
-<pre><code>// ПРИМЕР 3 — типизация объектов через interface
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">// ПРИМЕР 3 — типизация объектов через interface
 export function run() {
     interface User {
         name: string;
@@ -457,7 +464,7 @@ export function run() {
 
 <p>У функции можно указать тип каждого параметра и тип того, что она возвращает — после стрелки не нужно, тип результата пишется после скобок с параметрами:</p>
 
-<pre><code>function sum(a: number, b: number): number {
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">function sum(a: number, b: number): number {
     return a + b;
 }</code></pre>
 
@@ -465,7 +472,7 @@ export function run() {
 
 <h3>Необязательные и значения по умолчанию</h3>
 
-<pre><code>function greet(name: string, greeting: string = 'Привет'): string {
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">function greet(name: string, greeting: string = 'Привет'): string {
     return `${greeting}, ${name}!`;
 }
 
@@ -479,7 +486,7 @@ greet('Маша', 'Здравствуй'); // 'Здравствуй, Маша!'<
   <span class="path">src/examples/example4_functions.ts</span>
   <ol>
     <li>Создай файл:
-<pre><code>// ПРИМЕР 4 — типизация функций
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">// ПРИМЕР 4 — типизация функций
 export function run() {
     function sum(a: number, b: number): number {
         return a + b;
@@ -510,7 +517,7 @@ export function run() {
 
 <p>Иногда переменная может быть не любой строкой, а только одной из нескольких заранее известных — например, статус запроса. Такие варианты перечисляют через <code>|</code> (палка, «или»):</p>
 
-<pre><code>type Status = 'loading' | 'success' | 'error';
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">type Status = 'loading' | 'success' | 'error';
 
 function showStatus(status: Status): string {
     if (status === 'loading') return 'Загрузка...';
@@ -525,7 +532,7 @@ function showStatus(status: Status): string {
   <span class="path">src/examples/example5_union_types.ts</span>
   <ol>
     <li>Создай файл:
-<pre><code>// ПРИМЕР 5 — union-типы (значение из нескольких вариантов)
+<pre class="language-typescript" data-lang="ts"><code class="language-typescript">// ПРИМЕР 5 — union-типы (значение из нескольких вариантов)
 export function run() {
     type Status = 'loading' | 'success' | 'error';
 
@@ -566,9 +573,9 @@ export function run() {
 <h2>Домашнее задание</h2>
 <ol>
   <li><b>Свои типизированные переменные.</b> В новом файле <code>src/examples/homework.ts</code> объяви <code>name: string</code>, <code>age: number</code>, <code>isStudent: boolean</code> с любыми значениями и выведи все три в консоль.</li>
-  <li><b>Свой interface.</b> Опиши <code>interface Book</code> с тремя полями (например, <code>title: string</code>, <code>year: number</code>, необязательное <code>rating?: number</code>), создай два объекта этого типа — один с необязательным полем, другой без — и выведи оба.</li>
-  <li><b>Своя типизированная функция.</b> Напиши <code>formatPrice(amount: number): string</code>, которая возвращает строку вида <code>"120 грн"</code>, и вызови её пару раз с разными числами.</li>
-  <li><b>Поймай и покажи ошибку.</b> Нарочно сломай любой тип в своих же файлах (например, присвой <code>age</code> строку) — сфотографируй или запиши текст ошибки из редактора, покажи наставнику, потом исправь.</li>
+  <li><b>Свой interface.</b> Опиши <code>interface Band</code> с тремя полями (например, <code>name: string</code>, <code>foundedYear: number</code>, необязательное <code>genre?: string</code>) — под свою любимую группу, создай два объекта этого типа — один с необязательным полем, другой без — и выведи оба.</li>
+  <li><b>Своя типизированная функция.</b> Напиши <code>formatPrice(amount: number): string</code>, которая возвращает строку вида <code>"120 ₽"</code>, и вызови её пару раз с разными числами.</li>
+  <li><b>Поймай и покажи ошибку.</b> Нарочно сломай любой тип в своих же файлах (например, присвой <code>age</code> строку) — открой наставнику редактор с красной подчёркнутой ошибкой или текст ошибки из <code>npx tsc --noEmit</code>, потом исправь.</li>
 </ol>
 </div>
 
@@ -586,5 +593,54 @@ export function run() {
 <p class="lead">Дальше — урок 15: обобщения (generics) на простом уровне и типизация пропсов компонентов, а сразу после — старт React.</p>
 
 </div>
+
+<script>
+  // Каждый блок с кодом рендерится настоящим Monaco Editor (тем же движком, что внутри VS Code) —
+  // в режиме "только чтение", с подсветкой синтаксиса, номерами строк и тёмной темой vs-dark.
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs' } });
+  require(['vs/editor/editor.main'], function () {
+    var langMap = { ts: 'typescript', bash: 'shell', html: 'html' };
+    var blocks = document.querySelectorAll('pre[data-lang]');
+
+    blocks.forEach(function (pre) {
+      var codeEl = pre.querySelector('code');
+      if (!codeEl) return;
+
+      var text = codeEl.textContent.replace(/\n$/, '');
+      var lineCount = text.split('\n').length;
+      var lineHeight = 19;
+      var height = Math.min(560, Math.max(38, lineCount * lineHeight + 16));
+
+      var mount = document.createElement('div');
+      mount.className = 'monaco-mount';
+      mount.style.height = height + 'px';
+
+      pre.innerHTML = '';
+      pre.appendChild(mount);
+
+      monaco.editor.create(mount, {
+        value: text,
+        language: langMap[pre.dataset.lang] || 'plaintext',
+        theme: 'vs-dark',
+        readOnly: true,
+        domReadOnly: true,
+        contextmenu: false,
+        minimap: { enabled: false },
+        folding: false,
+        lineNumbersMinChars: 3,
+        renderLineHighlight: 'none',
+        overviewRulerLanes: 0,
+        hideCursorInOverviewRuler: true,
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        fontFamily: '"JetBrains Mono", Consolas, monospace',
+        fontSize: 13.5,
+        padding: { top: 8, bottom: 8 },
+        scrollbar: { alwaysConsumeMouseWheel: false },
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
