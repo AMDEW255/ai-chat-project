@@ -338,7 +338,7 @@ run()</code></pre></li>
 
 <table>
   <tr><th>Тип</th><th>Что хранит</th><th>Пример</th></tr>
-  <tr><td><code>string</code></td><td>текст</td><td><code>let name: string = 'Аня'</code></td></tr>
+  <tr><td><code>string</code></td><td>текст</td><td><code>let name: string = 'Маша'</code></td></tr>
   <tr><td><code>number</code></td><td>любое число</td><td><code>let age: number = 20</code></td></tr>
   <tr><td><code>boolean</code></td><td>true / false</td><td><code>let isOnline: boolean = true</code></td></tr>
   <tr><td><code>string[]</code></td><td>массив строк</td><td><code>let tags: string[] = ['js', 'ts']</code></td></tr>
@@ -397,7 +397,7 @@ export function run() {
 }
 
 const user: User = {
-    name: 'Аня',
+    name: 'Маша',
     age: 20
 };</code></pre>
 
@@ -413,7 +413,7 @@ const user: User = {
     isAdmin?: boolean; // может отсутствовать
 }
 
-const user1: User = { name: 'Аня', age: 20 };            // ок, isAdmin не указан
+const user1: User = { name: 'Маша', age: 20 };            // ок, isAdmin не указан
 const user2: User = { name: 'Игорь', age: 30, isAdmin: true }; // тоже ок</code></pre>
 
 <div class="box note">
@@ -435,7 +435,7 @@ export function run() {
     }
 
     const user: User = {
-        name: 'Аня',
+        name: 'Маша',
         age: 20
     };
 
@@ -469,8 +469,8 @@ export function run() {
     return `${greeting}, ${name}!`;
 }
 
-greet('Аня');              // 'Привет, Аня!'
-greet('Аня', 'Здравствуй'); // 'Здравствуй, Аня!'</code></pre>
+greet('Маша');              // 'Привет, Маша!'
+greet('Маша', 'Здравствуй'); // 'Здравствуй, Маша!'</code></pre>
 
 <p>Параметр со значением по умолчанию можно не передавать — TypeScript сам понимает, что он необязательный.</p>
 
@@ -491,8 +491,8 @@ export function run() {
         return `${greeting}, ${name}!`;
     }
 
-    console.log(greet('Аня'));
-    console.log(greet('Аня', 'Здравствуй'));
+    console.log(greet('Маша'));
+    console.log(greet('Маша', 'Здравствуй'));
 
     // ДОПИШИ ЗДЕСЬ:
     // напиши функцию multiply(a: number, b: number): number,
