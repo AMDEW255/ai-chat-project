@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Урок 14 — TypeScript: типы поверх твоего JavaScript</title>
+<style>
+  :root {
+    --bg: #fbf9f5;
+    --card: #ffffff;
+    --text: #24211d;
+    --muted: #6b6459;
+    --accent: #c2410c;
+    --accent-soft: #fff1e7;
+    --line: #e7e1d6;
+    --code-bg: #2d2a26;
+    --code-text: #f4efe7;
+    --ok: #15803d;
+    --ok-soft: #eafaf0;
+    --warn: #b45309;
+    --warn-soft: #fdf4e3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+    font-size: 17px;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.lesson {
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+  }
+  header.lesson .tag {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  h1 {
+    font-size: 30px;
+    line-height: 1.25;
+    margin: 14px 0 6px;
+  }
+  h2 {
+    font-size: 22px;
+    margin: 44px 0 12px;
+    padding-top: 8px;
+  }
+  h3 {
+    font-size: 18px;
+    margin: 28px 0 8px;
+    color: var(--accent);
+  }
+  p { margin: 12px 0; }
+  .lead { color: var(--muted); font-size: 18px; }
+  hr {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 40px 0;
+  }
+  code {
+    background: #f0ece2;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
+    font-size: 15px;
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 18px 20px;
+    border-radius: 12px;
+    overflow-x: auto;
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+  }
+  .box {
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border: 1px solid var(--line);
+  }
+  .box.analogy { background: var(--accent-soft); border-color: #f3d9c6; }
+  .box.note { background: var(--ok-soft); border-color: #c7ebd4; }
+  .box.warn { background: var(--warn-soft); border-color: #f0dcb4; }
+  .box .box-title {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+  }
+  .box.analogy .box-title { color: var(--accent); }
+  .box.note .box-title { color: var(--ok); }
+  .box.warn .box-title { color: var(--warn); }
+  ol, ul { padding-left: 24px; }
+  li { margin: 8px 0; }
+  .steps {
+    counter-reset: step;
+    list-style: none;
+    padding-left: 0;
+  }
+  .steps > li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 44px;
+    margin: 16px 0;
+  }
+  .steps > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 30px;
+    height: 30px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .timeline {
+    border-left: 3px solid var(--line);
+    padding-left: 20px;
+    margin: 20px 0;
+  }
+  .timeline .t {
+    position: relative;
+    margin: 14px 0;
+  }
+  .timeline .t::before {
+    content: "";
+    position: absolute;
+    left: -27px;
+    top: 8px;
+    width: 11px;
+    height: 11px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+  .q { font-weight: 700; }
+  a { color: var(--accent); }
+  .hw {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 8px 24px 20px;
+    margin-top: 24px;
+  }
+  .practice {
+    background: var(--accent-soft);
+    border: 1px solid #f3d9c6;
+    border-left: 5px solid var(--accent);
+    border-radius: 10px;
+    padding: 6px 22px 18px;
+    margin: 24px 0;
+  }
+  .practice .box-title {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--accent);
+    margin: 14px 0 4px;
+  }
+  .practice .path {
+    font-family: "SF Mono", "Fira Code", Consolas, "Courier New", monospace;
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #f0dcc7;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 18px 0;
+    font-size: 15.5px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #f0ece2; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="lesson">
+  <span class="tag">Урок 14</span>
+  <h1>TypeScript — типы поверх твоего JavaScript</h1>
+  <p class="lead">Дальше на курсе будет React, а почти весь React-код в реальных проектах пишут на TypeScript. Это два быстрых урока, чтобы прочитать чужой TS-код и писать свой на базовом уровне — без глубокого погружения, ровно чтобы не спотыкаться в React.</p>
+</header>
+
+<hr>
+
+<div class="box note">
+  <div class="box-title">Как устроен урок</div>
+  <p style="margin:6px 0 0;">В этот раз практика начинается не с готовых файлов — ты сама создашь проект командой в терминале, как это делают в реальной работе. Дальше внутри своего проекта будешь создавать файлы с примерами по инструкции: что скопировать, куда вставить, что дописать самой.</p>
+  <p style="margin:6px 0 0;">Урок идёт кусочками теории, и после каждого — оранжевая плашка <b>🔧 Практика</b>. Лучше разбирать пример сразу, пока теория перед глазами.</p>
+</div>
+
+<hr>
+
+<h2>0. Создаём проект</h2>
+
+<p>TypeScript — это не отдельный язык программирования «с нуля», а JavaScript <b>плюс типы</b>. Ты пишешь почти тот же код, что и раньше, но дополнительно указываешь, какого «сорта» значение хранится в переменной, что принимает и что возвращает функция. Файлы называются не <code>.js</code>, а <code>.ts</code>.</p>
+
+<p>Браузер TypeScript не понимает — он всегда выполняет обычный JavaScript. Поэтому нужен инструмент, который заранее проверит типы и превратит <code>.ts</code> в <code>.js</code>. В этом уроке — <b>Vite</b>: он же понадобится и в React, так что заодно познакомишься с ним заранее.</p>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — создание проекта</div>
+  <ol>
+    <li>Открой терминал в VS Code (меню <b>Terminal → New Terminal</b>) и перейди в корень своего проекта (папка <code>ai-chat-project-fresh</code>, где лежат <code>chat.js</code>, <code>lesson12_async</code> и т.д.).</li>
+    <li>Выполни команду:
+<pre><code>npm create vite@latest lesson14_typescript -- --template vanilla-ts</code></pre>
+    Она создаст новую папку <code>lesson14_typescript</code> рядом с <code>lesson12_async</code>, с заготовкой TypeScript-проекта внутри.</li>
+    <li>Перейди в неё и поставь зависимости:
+<pre><code>cd lesson14_typescript
+npm install</code></pre></li>
+    <li>Запусти локальный сервер:
+<pre><code>npm run dev</code></pre>
+    В терминале появится адрес вида <code>http://localhost:5173/</code> — открой его в браузере. Сервер остаётся работать, пока не нажмёшь <code>Ctrl+C</code> в терминале — не закрывай эту вкладку терминала весь урок.</li>
+    <li>Ты увидишь дефолтную страницу Vite со счётчиком — это просто шаблон-заглушка, шаг 5 её уберёт.</li>
+  </ol>
+</div>
+
+<div class="box warn">
+  <div class="box-title">Важно</div>
+  Vite не проверяет типы во время работы сервера — он только быстро собирает файлы, чтобы страница обновлялась мгновенно. Ошибки типов ты будешь видеть <b>в редакторе</b> (красное подчёркивание в VS Code) и по команде <code>npx tsc --noEmit</code> в терминале — она молча проверяет весь проект на ошибки типов, ничего не собирая.
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — убираем шаблон Vite</div>
+  <ol>
+    <li>В папке <code>src</code> удали файл <code>counter.ts</code> и папку <code>assets</code> — это демо-контент, он не нужен.</li>
+    <li>Открой <code>index.html</code> в корне проекта и замени всё содержимое на:
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="ru"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Урок 14 — TypeScript&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Урок 14 — TypeScript&lt;/h1&gt;
+    &lt;p&gt;Открой консоль (F12 → Console). Весь урок происходит там.&lt;/p&gt;
+    &lt;script type="module" src="/src/main.ts"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre></li>
+    <li>Открой <code>src/main.ts</code>, удали всё, оставь одну строку:
+<pre><code>console.log('main.ts работает')</code></pre></li>
+    <li>Сохрани оба файла. Вкладка в браузере обновится сама (это и есть та самая мгновенная пересборка Vite). Открой консоль (<code>F12</code>) — увидишь строку из <code>main.ts</code>.</li>
+    <li>Внутри <code>src</code> создай папку <code>examples</code> — в неё дальше будешь класть файлы с примерами этого урока.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>1. Зачем нужны типы</h2>
+
+<p>В обычном JavaScript переменная может в любой момент стать чем угодно:</p>
+
+<pre><code>let age = 25;
+age = 'двадцать шесть'; // JS не против, ошибки не будет</code></pre>
+
+<p>Это работает, пока код маленький. Но если <code>age</code> потом используют в математике (<code>age + 1</code>) — программа не упадёт сразу, а тихо сломается где-то дальше, и искать причину придётся уже <i>после</i> того, как это увидел пользователь.</p>
+
+<p>TypeScript даёт способ сказать заранее: «эта переменная — всегда число», и если кто-то (в том числе ты сама через месяц) попробует положить туда строку — TypeScript укажет на ошибку сразу в редакторе, до запуска.</p>
+
+<pre><code>let age: number = 25;
+age = 'двадцать шесть'; // ошибка типа — увидишь сразу</code></pre>
+
+<div class="box analogy">
+  <div class="box-title">Аналогия</div>
+  Обычный JS — склад без подписанных коробок: класть можно что угодно куда угодно, а потом кладовщик долго ищет, куда делись гвозди, если кто-то положил туда яблоки. TypeScript — те же коробки, но с подписями. Положить не то — тебе сразу скажут на входе, а не когда коробку откроют на другом конце склада.
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 1: первая пойманная ошибка</div>
+  <span class="path">src/examples/example1_first_error.ts</span>
+  <ol>
+    <li>Создай в <code>src/examples/</code> файл <code>example1_first_error.ts</code> с содержимым:
+<pre><code>// ПРИМЕР 1 — зачем нужен TypeScript
+export function run() {
+    let age: number = 25;
+    console.log('возраст:', age);
+
+    age = 26;
+    console.log('возраст после дня рождения:', age);
+}</code></pre></li>
+    <li>Открой <code>src/main.ts</code> и замени содержимое на:
+<pre><code>import { run } from './examples/example1_first_error'
+
+run()</code></pre></li>
+    <li>Сохрани, открой консоль в браузере — увидишь два <code>console.log</code>. Ошибок нет: <code>26</code> — тоже число, всё по правилам.</li>
+    <li>Теперь сломай нарочно: замени строку <code>age = 26;</code> на <code>age = 'двадцать шесть';</code>. Посмотри на редактор — под этой строкой появится красная волнистая линия. Наведи курсор — увидишь текст ошибки.</li>
+    <li>В терминале (в новой вкладке терминала, не останавливая <code>npm run dev</code>) выполни:
+<pre><code>npx tsc --noEmit</code></pre>
+    Увидишь ту же ошибку текстом: <code>Type 'string' is not assignable to type 'number'</code>.</li>
+    <li>Верни <code>age = 26;</code> обратно и убедись, что ошибка пропала.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>2. Базовые типы</h2>
+
+<p>Самые частые типы в TypeScript — те же понятия, что и в JS, только теперь их можно назвать явно после двоеточия:</p>
+
+<table>
+  <tr><th>Тип</th><th>Что хранит</th><th>Пример</th></tr>
+  <tr><td><code>string</code></td><td>текст</td><td><code>let name: string = 'Аня'</code></td></tr>
+  <tr><td><code>number</code></td><td>любое число</td><td><code>let age: number = 20</code></td></tr>
+  <tr><td><code>boolean</code></td><td>true / false</td><td><code>let isOnline: boolean = true</code></td></tr>
+  <tr><td><code>string[]</code></td><td>массив строк</td><td><code>let tags: string[] = ['js', 'ts']</code></td></tr>
+  <tr><td><code>number[]</code></td><td>массив чисел</td><td><code>let scores: number[] = [10, 20]</code></td></tr>
+</table>
+
+<p>Часто тип можно вообще не писать — TypeScript сам его угадывает по значению справа (это называется <b>вывод типа</b>, type inference):</p>
+
+<pre><code>let city = 'Киев'; // TypeScript сам понял: это string</code></pre>
+
+<p>Явно писать тип полезно там, где значения ещё нет — например, у параметров функции (увидишь в разделе 4).</p>
+
+<div class="box warn">
+  <div class="box-title">Тип <code>any</code> — и почему его лучше избегать</div>
+  Есть тип <code>any</code> — «может быть чем угодно», он выключает всю проверку для этой переменной. Иногда он реально нужен (например, работа со старым JS-кодом без типов), но если ставить <code>any</code> везде «чтобы TypeScript не ругался» — смысла в TypeScript не остаётся вообще. Используй его только когда правда не можешь описать тип иначе.
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 2</div>
+  <span class="path">src/examples/example2_basic_types.ts</span>
+  <ol>
+    <li>Создай файл с содержимым:
+<pre><code>// ПРИМЕР 2 — базовые типы и массивы
+export function run() {
+    const city: string = 'Киев';
+    const usersCount: number = 12;
+    const isOnline: boolean = true;
+
+    console.log(city, usersCount, isOnline);
+
+    const tags: string[] = ['js', 'ts', 'frontend'];
+    tags.push('react');
+    console.log(tags);
+
+    // ДОПИШИ ЗДЕСЬ:
+    // 1) объяви свою переменную favoriteNumber с типом number
+    // 2) объяви массив scores: number[] с любыми тремя числами
+    // 3) выведи обе через console.log
+}</code></pre></li>
+    <li>В <code>src/main.ts</code> поменяй импорт на <code>example2_basic_types</code> (остальное не трогай).</li>
+    <li>Сохрани, посмотри консоль — всё выводится без ошибок.</li>
+    <li>Допиши то, что просят комментарии <code>// ДОПИШИ ЗДЕСЬ</code>.</li>
+    <li>Попробуй специально ошибиться: например, впиши в <code>scores</code> строку вместо числа — <code>[10, 'двадцать', 30]</code>. Посмотри на ошибку в редакторе, потом убери её.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>3. Типизация объектов через <code>interface</code></h2>
+
+<p>Объекты — это то, с чем ты работаешь постоянно (вспомни <code>createMessage</code> в своём <code>chat.js</code>, который возвращает объект с полями <code>text</code>, <code>time</code>, <code>sender</code>). В TypeScript можно заранее описать, какие поля обязаны быть у объекта и какого они типа — через <code>interface</code>:</p>
+
+<pre><code>interface User {
+    name: string;
+    age: number;
+}
+
+const user: User = {
+    name: 'Аня',
+    age: 20
+};</code></pre>
+
+<p>Если в объекте не хватает поля, лишнее поле, или тип поля не совпал — TypeScript укажет на ошибку сразу при создании объекта, а не когда где-то в коде обратятся к несуществующему полю.</p>
+
+<h3>Необязательные поля — знак <code>?</code></h3>
+
+<p>Если поле есть не у всех объектов этого вида, ставь после его имени <code>?</code>:</p>
+
+<pre><code>interface User {
+    name: string;
+    age: number;
+    isAdmin?: boolean; // может отсутствовать
+}
+
+const user1: User = { name: 'Аня', age: 20 };            // ок, isAdmin не указан
+const user2: User = { name: 'Игорь', age: 30, isAdmin: true }; // тоже ок</code></pre>
+
+<div class="box note">
+  <div class="box-title">interface или type?</div>
+  Ты ещё можешь встретить похожую запись через <code>type</code>: <code>type User = { name: string; age: number }</code>. Для описания формы объекта они почти всегда взаимозаменяемы — на этом уровне разницу можно не запоминать, увидишь оба варианта в чужом коде. В React пропсы компонентов описывают именно так — этот приём пригодится уже на следующем уроке.
+</div>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 3</div>
+  <span class="path">src/examples/example3_objects_interfaces.ts</span>
+  <ol>
+    <li>Создай файл:
+<pre><code>// ПРИМЕР 3 — типизация объектов через interface
+export function run() {
+    interface User {
+        name: string;
+        age: number;
+        isAdmin?: boolean; // необязательное поле
+    }
+
+    const user: User = {
+        name: 'Аня',
+        age: 20
+    };
+
+    console.log(user);
+
+    // ДОПИШИ ЗДЕСЬ:
+    // 1) создай второй объект user2 такого же типа User, но с полем isAdmin: true
+    // 2) выведи его в консоль
+}</code></pre></li>
+    <li>Поменяй импорт в <code>main.ts</code>, сохрани, проверь консоль.</li>
+    <li>Допиши <code>user2</code>.</li>
+    <li>Сломай нарочно: убери у <code>user</code> поле <code>age</code> целиком. Посмотри на ошибку — TypeScript скажет, что не хватает обязательного поля. Верни обратно.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>4. Типизация функций</h2>
+
+<p>У функции можно указать тип каждого параметра и тип того, что она возвращает — после стрелки не нужно, тип результата пишется после скобок с параметрами:</p>
+
+<pre><code>function sum(a: number, b: number): number {
+    return a + b;
+}</code></pre>
+
+<p>Если внутри случайно вернуть не то (например, строку вместо числа) — TypeScript укажет на ошибку прямо в функции, а не там, где результат потом используют.</p>
+
+<h3>Необязательные и значения по умолчанию</h3>
+
+<pre><code>function greet(name: string, greeting: string = 'Привет'): string {
+    return `${greeting}, ${name}!`;
+}
+
+greet('Аня');              // 'Привет, Аня!'
+greet('Аня', 'Здравствуй'); // 'Здравствуй, Аня!'</code></pre>
+
+<p>Параметр со значением по умолчанию можно не передавать — TypeScript сам понимает, что он необязательный.</p>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 4</div>
+  <span class="path">src/examples/example4_functions.ts</span>
+  <ol>
+    <li>Создай файл:
+<pre><code>// ПРИМЕР 4 — типизация функций
+export function run() {
+    function sum(a: number, b: number): number {
+        return a + b;
+    }
+
+    console.log('сумма:', sum(2, 3));
+
+    function greet(name: string, greeting: string = 'Привет'): string {
+        return `${greeting}, ${name}!`;
+    }
+
+    console.log(greet('Аня'));
+    console.log(greet('Аня', 'Здравствуй'));
+
+    // ДОПИШИ ЗДЕСЬ:
+    // напиши функцию multiply(a: number, b: number): number,
+    // которая возвращает произведение, и вызови её
+}</code></pre></li>
+    <li>Поменяй импорт в <code>main.ts</code>, сохрани, проверь консоль.</li>
+    <li>Допиши <code>multiply</code>.</li>
+    <li>Сломай нарочно: в <code>sum</code> замени <code>return a + b;</code> на <code>return 'готово';</code>. Посмотри на ошибку у слова <code>return</code> — TypeScript не даст вернуть не тот тип, который обещан после скобок. Верни как было.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>5. Union-типы — значение из нескольких вариантов</h2>
+
+<p>Иногда переменная может быть не любой строкой, а только одной из нескольких заранее известных — например, статус запроса. Такие варианты перечисляют через <code>|</code> (палка, «или»):</p>
+
+<pre><code>type Status = 'loading' | 'success' | 'error';
+
+function showStatus(status: Status): string {
+    if (status === 'loading') return 'Загрузка...';
+    if (status === 'success') return 'Готово!';
+    return 'Ошибка загрузки';
+}</code></pre>
+
+<p>Если попробовать передать в <code>showStatus</code> что-то, кроме этих трёх строк — например, <code>'pending'</code> — TypeScript сразу укажет на ошибку. Это ровно то, что происходит у тебя в чате с состоянием загрузки (<code>loaderIndicator</code> либо показан, либо скрыт) — только здесь TypeScript не даст опечататься в названии статуса.</p>
+
+<div class="practice">
+  <div class="box-title">🔧 Практика — пример 5</div>
+  <span class="path">src/examples/example5_union_types.ts</span>
+  <ol>
+    <li>Создай файл:
+<pre><code>// ПРИМЕР 5 — union-типы (значение из нескольких вариантов)
+export function run() {
+    type Status = 'loading' | 'success' | 'error';
+
+    function showStatus(status: Status): string {
+        if (status === 'loading') return 'Загрузка...';
+        if (status === 'success') return 'Готово!';
+        return 'Ошибка загрузки';
+    }
+
+    console.log(showStatus('loading'));
+    console.log(showStatus('success'));
+    console.log(showStatus('error'));
+
+    // ДОПИШИ ЗДЕСЬ:
+    // объяви свой union-тип Theme = 'light' | 'dark'
+    // и переменную theme: Theme с любым из двух значений
+}</code></pre></li>
+    <li>Поменяй импорт в <code>main.ts</code>, сохрани, проверь консоль.</li>
+    <li>Допиши <code>Theme</code> и <code>theme</code>.</li>
+    <li>Сломай нарочно: вызови <code>showStatus('pending')</code>. Посмотри на ошибку — такого варианта нет среди разрешённых. Убери эту строку обратно.</li>
+  </ol>
+</div>
+
+<hr>
+
+<h2>6. Быстрая проверка себя</h2>
+
+<ol>
+  <li>Чем компилятор TypeScript отличается от вывода типов (type inference) — когда тип нужно писать явно, а когда TypeScript угадает сам?</li>
+  <li>Зачем у поля объекта ставят <code>?</code> и что будет, если создать объект без этого поля?</li>
+  <li>Где в описании функции пишется тип параметров, а где — тип возвращаемого значения?</li>
+  <li>Чем union-тип <code>'loading' | 'success' | 'error'</code> лучше, чем просто <code>string</code>, для той же переменной?</li>
+</ol>
+
+<hr>
+
+<div class="hw">
+<h2>Домашнее задание</h2>
+<ol>
+  <li><b>Свои типизированные переменные.</b> В новом файле <code>src/examples/homework.ts</code> объяви <code>name: string</code>, <code>age: number</code>, <code>isStudent: boolean</code> с любыми значениями и выведи все три в консоль.</li>
+  <li><b>Свой interface.</b> Опиши <code>interface Book</code> с тремя полями (например, <code>title: string</code>, <code>year: number</code>, необязательное <code>rating?: number</code>), создай два объекта этого типа — один с необязательным полем, другой без — и выведи оба.</li>
+  <li><b>Своя типизированная функция.</b> Напиши <code>formatPrice(amount: number): string</code>, которая возвращает строку вида <code>"120 грн"</code>, и вызови её пару раз с разными числами.</li>
+  <li><b>Поймай и покажи ошибку.</b> Нарочно сломай любой тип в своих же файлах (например, присвой <code>age</code> строку) — сфотографируй или запиши текст ошибки из редактора, покажи наставнику, потом исправь.</li>
+</ol>
+</div>
+
+<hr>
+
+<h2>Источники</h2>
+<ul>
+  <li><a href="https://www.typescriptlang.org/docs/handbook/2/basic-types.html" target="_blank" rel="noopener noreferrer">TypeScript Handbook — Basic Types</a></li>
+  <li><a href="https://www.typescriptlang.org/docs/handbook/2/everyday-types.html" target="_blank" rel="noopener noreferrer">TypeScript Handbook — Everyday Types</a></li>
+  <li><a href="https://www.typescriptlang.org/docs/handbook/2/objects.html" target="_blank" rel="noopener noreferrer">TypeScript Handbook — Object Types</a></li>
+</ul>
+
+<hr>
+
+<p class="lead">Дальше — урок 15: обобщения (generics) на простом уровне и типизация пропсов компонентов, а сразу после — старт React.</p>
+
+</div>
+</body>
+</html>
